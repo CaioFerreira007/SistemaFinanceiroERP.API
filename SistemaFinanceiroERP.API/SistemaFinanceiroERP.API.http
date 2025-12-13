@@ -1,0 +1,6 @@
+@SistemaFinanceiroERP.API_HostAddress = http://localhost:5210
+
+GET {{SistemaFinanceiroERP.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
