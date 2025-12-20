@@ -17,5 +17,6 @@
         public string UnidadeMedida { get; set; } = string.Empty;
 
         public int EmpresaId { get; set; }
+
     }
 }
