@@ -4,6 +4,8 @@ using SistemaFinanceiroERP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Mvc;
+using SistemaFinanceiroERP.API.DTOs.Produto;
+using AutoMapper;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
@@ -12,44 +14,53 @@ namespace SistemaFinanceiroERP.API.Controllers
     public class ProdutoController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public ProdutoController(AppDbContext context)
+        public ProdutoController(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost]
 
-        public async Task<ActionResult<Produto>> Create([FromBody] Produto produto)
+        public async Task<ActionResult<ProdutoResponseDto>> Create([FromBody] ProdutoCreateDto dto)
         {
 
-            var empresa = await _context.Empresas.FindAsync(produto.EmpresaId);
-            if(empresa == null || !empresa.Ativo)
+            var empresa = await _context.Empresas.FindAsync(dto.EmpresaId);
+            if (empresa == null || !empresa.Ativo)
             {
                 return BadRequest("Empresa não encontrada ou inativa");
-            }
-            produto.DataCriacao = DateTime.UtcNow;
-            produto.Ativo = true;
 
-            _context.Produtos.Add(produto);
+            }
+            var produtoNovo = _mapper.Map<Produto>(dto);
+            produtoNovo.DataCriacao = DateTime.UtcNow;
+            produtoNovo.Ativo = true;
+
+            _context.Produtos.Add(produtoNovo);
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = produto.Id }, produto);
+            var response = _mapper.Map<ProdutoResponseDto>(produtoNovo);
+
+
+            return CreatedAtAction(nameof(GetById), new { id = produtoNovo.Id }, response);
         }
 
         [HttpGet]
 
-        public async Task<ActionResult<IEnumerable<Produto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ProdutoResponseDto>>> GetAll()
         {
             var produtos = await _context.Produtos.ToListAsync();
 
-            return Ok(produtos);
+            var response = _mapper.Map<List<ProdutoResponseDto>>(produtos);
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
 
-        public async Task<ActionResult<Produto>> GetById(int id)
+        public async Task<ActionResult<ProdutoResponseDto>> GetById(int id)
         {
             var produto = await _context.Produtos.FindAsync(id);
 
@@ -57,42 +68,39 @@ namespace SistemaFinanceiroERP.API.Controllers
             {
                 return NotFound();
             }
-            return Ok(produto);
+
+            var response = _mapper.Map<ProdutoResponseDto>(produto);
+
+            return Ok(response);
         }
 
         [HttpPut("{id}")]
 
-        public async Task<ActionResult<Produto>> Update(int id, [FromBody] Produto produtoAtualizado)
+        public async Task<ActionResult<ProdutoResponseDto>> Update(int id, [FromBody] ProdutoUpdateDto dto)
         {
 
-            var empresa = await _context.Empresas.FindAsync(produtoAtualizado.EmpresaId);
-            if (empresa == null || !empresa.Ativo)
-            {
-                return BadRequest("Empresa não encontrada ou inativa");
-            }
-            if (id != produtoAtualizado.Id )
-            {
-                return BadRequest("O id da url não corresponde ao id do produto");
-            }
-            var produtoExiste = await _context.Produtos.FindAsync(id);
-            if(produtoExiste == null)
-            {
+
+                var produtoExiste = await _context.Produtos.FindAsync(id);
+
+             if (produtoExiste == null)
+             {
                 return NotFound();
-            }
+             }
 
-            produtoExiste.ProdutoNome = produtoAtualizado.ProdutoNome;
-            produtoExiste.Categoria = produtoAtualizado.Categoria;
-            produtoExiste.Descricao = produtoAtualizado.Descricao;
-                produtoExiste.PrecoUnitario = produtoAtualizado.PrecoUnitario;
-                produtoExiste.CodigoBarras = produtoAtualizado.CodigoBarras;
-                produtoExiste.QuantidadeEstoque = produtoAtualizado.QuantidadeEstoque;
-            produtoExiste.UnidadeMedida = produtoAtualizado.UnidadeMedida;
-            produtoExiste.DataAtualizacao = DateTime.UtcNow;
-                produtoExiste.EmpresaId = produtoAtualizado.EmpresaId;
+                 if (id != dto.Id)
+                    {
+                             return BadRequest("O id da url não corresponde ao id do produto");
+                    }
 
-            await _context.SaveChangesAsync();  
+             _mapper.Map(dto, produtoExiste);
 
-            return Ok(produtoExiste);
+                   produtoExiste.DataAtualizacao = DateTime.UtcNow;
+
+                    var response = _mapper.Map<ProdutoResponseDto>(produtoExiste);
+
+                     await _context.SaveChangesAsync();
+
+                         return Ok(response);
         }
         [HttpDelete("{id}")]
 
