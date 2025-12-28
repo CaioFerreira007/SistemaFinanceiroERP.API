@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SistemaFinanceiroERP.API.DTOs.Produto;
+using SistemaFinanceiroERP.API.DTOs.Usuario;
 using SistemaFinanceiroERP.Domain.Entities;
 using SistemaFinanceiroERP.Infrastructure.Data;
 
@@ -11,28 +14,35 @@ namespace SistemaFinanceiroERP.API.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public UsuarioController(AppDbContext context)
+        public UsuarioController(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Usuario>> Create([FromBody] Usuario usuario)
+        public async Task<ActionResult<UsuarioResponseDto>> Create([FromBody] UsuarioCreateDto dto)
         {
 
-            var empresa = await _context.Empresas.FindAsync(usuario.EmpresaId);
+            var empresa = await _context.Empresas.FindAsync(dto.EmpresaId);
             if (empresa == null || !empresa.Ativo)
             {
                 return BadRequest("Empresa não encontrada ou inativa");
             }
+
+            var usuario = _mapper.Map<Usuario>(dto);
             usuario.DataCriacao = DateTime.UtcNow;
             usuario.Ativo = true;
 
             _context.Usuarios.Add(usuario);
 
+
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = usuario.Id }, usuario);
+
+            var response = _mapper.Map<UsuarioResponseDto>(usuario);
+            return CreatedAtAction(nameof(GetById), new { id = usuario.Id }, response);
 
 
         }
@@ -40,16 +50,18 @@ namespace SistemaFinanceiroERP.API.Controllers
 
         [HttpGet]
 
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetAll()
+        public async Task<ActionResult<IEnumerable<UsuarioResponseDto>>> GetAll()
         {
             var usuarios = await _context.Usuarios.ToListAsync();
 
-            return Ok(usuarios);
+            var response = _mapper.Map<List<UsuarioResponseDto>>(usuarios);
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
 
-        public async Task<ActionResult<Usuario>> GetById(int id)
+        public async Task<ActionResult<UsuarioResponseDto>> GetById(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
 
@@ -57,19 +69,20 @@ namespace SistemaFinanceiroERP.API.Controllers
             {
                 return NotFound();
             }
-            return Ok(usuario);
+            var response = _mapper.Map<UsuarioResponseDto>(usuario);
+            return Ok(response);
         }
 
         [HttpPut("{id}")]
 
-        public async Task<ActionResult<Usuario>> Update(int id, [FromBody] Usuario usuarioAtualizado)
+        public async Task<ActionResult<UsuarioResponseDto>> Update(int id, [FromBody] UsuarioUpdateDto dto)
         {
-            var empresa = await _context.Empresas.FindAsync(usuarioAtualizado.EmpresaId);
+            var empresa = await _context.Empresas.FindAsync(id);
             if (empresa == null || !empresa.Ativo)
             {
                 return BadRequest("Empresa não encontrada ou inativa");
             }
-            if (id != usuarioAtualizado.Id)
+            if (id != dto.Id)
             {
                 return BadRequest("O id da url não corresponde ao id do usuário");
             }
@@ -79,15 +92,15 @@ namespace SistemaFinanceiroERP.API.Controllers
                 return NotFound();
             }
 
-            usuarioExiste.UsuarioNome = usuarioAtualizado.UsuarioNome;
-            usuarioExiste.Telefone= usuarioAtualizado.Telefone;
-            usuarioExiste.Email = usuarioAtualizado.Email;
-            usuarioExiste.Senha = usuarioAtualizado.Senha;
+            _mapper.Map(dto, usuarioExiste);
+
             usuarioExiste.DataAtualizacao = DateTime.UtcNow;
+            var response = _mapper.Map<UsuarioResponseDto>(usuarioExiste);
+
 
             await _context.SaveChangesAsync();
 
-            return Ok(usuarioExiste);
+            return Ok(response);
         }
         [HttpDelete("{id}")]
 

@@ -2,6 +2,8 @@
 using SistemaFinanceiroERP.Domain.Entities;
 using SistemaFinanceiroERP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using SistemaFinanceiroERP.API.DTOs.Empresa;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
@@ -10,47 +12,54 @@ namespace SistemaFinanceiroERP.API.Controllers
     public class EmpresaController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public EmpresaController(AppDbContext context)  
+
+        public EmpresaController(AppDbContext context, IMapper mapper)  
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost]
 
-        public async Task<ActionResult<Empresa>> Create([FromBody] Empresa empresa)
+        public async Task<ActionResult<EmpresaResponseDto>> Create([FromBody] EmpresaCreateDto dto)
         {
+            var empresa = _mapper.Map<Empresa>(dto);
             empresa.DataCriacao = DateTime.UtcNow;
             empresa.Ativo = true;
             _context.Empresas.Add(empresa);
+            var response = _mapper.Map<EmpresaResponseDto>(empresa);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = empresa.Id }, empresa);
+            return CreatedAtAction(nameof(GetById), new { id = empresa.Id }, response);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Empresa>>> GetAll()
+        public async Task<ActionResult<IEnumerable<EmpresaResponseDto>>> GetAll()
         {
             var empresas = await _context.Empresas.ToListAsync();
-            return Ok(empresas);
+            var response = _mapper.Map<IEnumerable<EmpresaResponseDto>>(empresas);
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
 
-        public async Task <ActionResult<Empresa>> GetById(int id)
+        public async Task <ActionResult<EmpresaResponseDto>> GetById(int id)
         {
             var empresa = await _context.Empresas.FindAsync(id);
             if(empresa == null)
             {
                 return NotFound();
             }
-            return Ok(empresa);
+            var response = _mapper.Map<EmpresaResponseDto>(empresa);
+            return Ok(response);
         }
 
         [HttpPut("{id}")]
 
-        public async Task<ActionResult<Empresa>> Update(int id, [FromBody]Empresa empresaAtualizada)
+        public async Task<ActionResult<EmpresaResponseDto>> Update(int id, [FromBody]EmpresaUpdateDto dto)
         {
-            if (id != empresaAtualizada.Id)
+            if (id != dto.Id)
             {
                 return BadRequest("ID da URL não corresponde ao ID da empresa");
             }
@@ -62,17 +71,14 @@ namespace SistemaFinanceiroERP.API.Controllers
                 return NotFound();
             }
 
-            empresaExistente.Cnpj = empresaAtualizada.Cnpj;
-            empresaExistente.RazaoSocial = empresaAtualizada.RazaoSocial;
-            empresaExistente.NomeEmpresa = empresaAtualizada.NomeEmpresa;
-            empresaExistente.Telefone = empresaAtualizada.Telefone;
-            empresaExistente.Email = empresaAtualizada.Email;
-            empresaExistente.Tipo = empresaAtualizada.Tipo;
+            _mapper.Map(dto,empresaExistente);
+
             empresaExistente.DataAtualizacao = DateTime.UtcNow;
-
             await _context.SaveChangesAsync();
+            var response = _mapper.Map<EmpresaResponseDto>(empresaExistente);
 
-            return Ok(empresaExistente);
+
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
