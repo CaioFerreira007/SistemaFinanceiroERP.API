@@ -4,6 +4,7 @@ using SistemaFinanceiroERP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using SistemaFinanceiroERP.API.DTOs.Empresa;
+using FluentValidation;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
@@ -13,18 +14,29 @@ namespace SistemaFinanceiroERP.API.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IValidator<EmpresaCreateDto> _createValidator;
+        private readonly IValidator<EmpresaUpdateDto> _updateValidator;
 
 
-        public EmpresaController(AppDbContext context, IMapper mapper)  
+        public EmpresaController(AppDbContext context, IMapper mapper, IValidator<EmpresaCreateDto> createValidator, IValidator<EmpresaUpdateDto> updateValidator)
         {
             _context = context;
             _mapper = mapper;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
         }
 
         [HttpPost]
 
         public async Task<ActionResult<EmpresaResponseDto>> Create([FromBody] EmpresaCreateDto dto)
         {
+
+            var validationResult = await _createValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
+
             var empresa = _mapper.Map<Empresa>(dto);
             empresa.DataCriacao = DateTime.UtcNow;
             empresa.Ativo = true;
@@ -59,6 +71,14 @@ namespace SistemaFinanceiroERP.API.Controllers
 
         public async Task<ActionResult<EmpresaResponseDto>> Update(int id, [FromBody]EmpresaUpdateDto dto)
         {
+
+            var validationResult = await _updateValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
+
+
             if (id != dto.Id)
             {
                 return BadRequest("ID da URL não corresponde ao ID da empresa");

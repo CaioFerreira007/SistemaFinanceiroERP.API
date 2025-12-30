@@ -96,25 +96,35 @@ namespace SistemaFinanceiroERP.API.Controllers
 
             var produtoExiste = await _context.Produtos.FindAsync(id);
 
-             if (produtoExiste == null)
-             {
+            if (produtoExiste == null)
+            {
                 return NotFound();
-             }
+            }
 
-                 if (id != dto.Id)
-                    {
-                             return BadRequest("O id da url não corresponde ao id do produto");
-                    }
+            var produtoEmpresaExiste = await _context.Produtos.FindAsync(produtoExiste.EmpresaId);
 
-             _mapper.Map(dto, produtoExiste);
+            if (produtoEmpresaExiste == null || !produtoEmpresaExiste.Ativo)
+            {
+                return BadRequest("Empresa do produto não encontrada ou inativa");
+            }
 
-                   produtoExiste.DataAtualizacao = DateTime.UtcNow;
+            if (id != dto.Id)
+            {
+                return BadRequest("O id da url não corresponde ao id do produto");
+            }
+            var empresa = await _context.Empresas.FindAsync(dto.EmpresaId);
+            if (empresa == null || !empresa.Ativo)
+            {
+                return BadRequest("Empresa não encontrada ou inativa.");
+            }
+            produtoExiste.DataAtualizacao = DateTime.UtcNow;
 
-                    var response = _mapper.Map<ProdutoResponseDto>(produtoExiste);
 
-                     await _context.SaveChangesAsync();
+            _mapper.Map(dto, produtoExiste);
+            await _context.SaveChangesAsync();
+            var response = _mapper.Map<ProdutoResponseDto>(produtoExiste);
 
-                         return Ok(response);
+            return Ok(response);
         }
         [HttpDelete("{id}")]
 

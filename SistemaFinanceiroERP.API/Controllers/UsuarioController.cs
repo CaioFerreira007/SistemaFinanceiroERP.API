@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SistemaFinanceiroERP.API.DTOs.Produto;
 using SistemaFinanceiroERP.API.DTOs.Usuario;
 using SistemaFinanceiroERP.Domain.Entities;
 using SistemaFinanceiroERP.Infrastructure.Data;
@@ -15,16 +14,26 @@ namespace SistemaFinanceiroERP.API.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IValidator<UsuarioCreateDto> _createValidator;
+        private readonly IValidator<UsuarioUpdateDto> _updateValidator;
 
-        public UsuarioController(AppDbContext context, IMapper mapper)
+        public UsuarioController(AppDbContext context, IMapper mapper, IValidator<UsuarioCreateDto> createValidator, IValidator <UsuarioUpdateDto>updateValidator)
         {
             _context = context;
             _mapper = mapper;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
         }
 
         [HttpPost]
         public async Task<ActionResult<UsuarioResponseDto>> Create([FromBody] UsuarioCreateDto dto)
         {
+
+            var validationResult = await _createValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
 
             var empresa = await _context.Empresas.FindAsync(dto.EmpresaId);
             if (empresa == null || !empresa.Ativo)
@@ -77,11 +86,15 @@ namespace SistemaFinanceiroERP.API.Controllers
 
         public async Task<ActionResult<UsuarioResponseDto>> Update(int id, [FromBody] UsuarioUpdateDto dto)
         {
-            var empresa = await _context.Empresas.FindAsync(id);
-            if (empresa == null || !empresa.Ativo)
+
+
+            var validationResult = await _updateValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
             {
-                return BadRequest("Empresa não encontrada ou inativa");
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
             }
+            var empresa = await _context.Empresas.FindAsync(id);
+          
             if (id != dto.Id)
             {
                 return BadRequest("O id da url não corresponde ao id do usuário");
@@ -92,6 +105,14 @@ namespace SistemaFinanceiroERP.API.Controllers
                 return NotFound();
             }
 
+
+            var empresaDoUsuario = await _context.Empresas.FindAsync(usuarioExiste.EmpresaId);
+            if (empresaDoUsuario == null || !empresaDoUsuario.Ativo)
+            {
+                return NotFound("A empresa associada ao usuário não foi encontrada ou está inativa.");
+            }
+
+           
             _mapper.Map(dto, usuarioExiste);
 
             usuarioExiste.DataAtualizacao = DateTime.UtcNow;
