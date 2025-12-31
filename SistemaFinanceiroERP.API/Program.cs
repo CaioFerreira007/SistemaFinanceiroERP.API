@@ -1,8 +1,9 @@
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using SistemaFinanceiroERP.API.Validators.Produto;
+using SistemaFinanceiroERP.Application.Interfaces;
 using SistemaFinanceiroERP.Infrastructure.Data;
+using SistemaFinanceiroERP.Infrastructure.Security;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddAutoMapper(typeof(Program));
 
-
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 // Add services to the container.
 
 builder.Services.AddControllers()

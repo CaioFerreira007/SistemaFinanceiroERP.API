@@ -10,5 +10,7 @@
         public string CodigoBarras { get; set; } = string.Empty;
         public int QuantidadeEstoque { get; set; }
         public string UnidadeMedida { get; set; } = string.Empty;
+        public int EmpresaId { get; set; }
+
     }
 }

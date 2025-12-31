@@ -10,7 +10,7 @@ namespace SistemaFinanceiroERP.API.Profiles
         public UsuarioProfile()
         {
             CreateMap<UsuarioCreateDto, Usuario>();
-            CreateMap<UsuarioUpdateDto, Usuario>();
+            CreateMap<UsuarioUpdateDto, Usuario>().ForMember(dest => dest.Senha, opt => opt.Ignore());
             CreateMap<Usuario, UsuarioResponseDto>();
         }
     }
