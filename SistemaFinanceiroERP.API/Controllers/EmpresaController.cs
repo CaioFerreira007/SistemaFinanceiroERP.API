@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SistemaFinanceiroERP.API.DTOs.Empresa;
 using SistemaFinanceiroERP.Domain.Entities;
 using SistemaFinanceiroERP.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using SistemaFinanceiroERP.API.DTOs.Empresa;
-using FluentValidation;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EmpresaController : ControllerBase
     {
         private readonly AppDbContext _context;

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaFinanceiroERP.API.DTOs.Usuario;
@@ -11,6 +12,7 @@ namespace SistemaFinanceiroERP.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsuarioController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -111,18 +113,19 @@ namespace SistemaFinanceiroERP.API.Controllers
                 return NotFound("A empresa associada ao usuário não foi encontrada ou está inativa.");
             }
 
-           
-        
+
+
 
             if (!string.IsNullOrWhiteSpace(dto.Senha))
             {
                 bool senhaEhIgual = _passwordHasher.VerifyPassword(dto.Senha, usuarioExiste.Senha);
 
-                if (!senhaEhIgual)
+                if (senhaEhIgual)
                 {
-                    usuarioExiste.Senha = _passwordHasher.HashPassword(dto.Senha);
+                    return BadRequest("A nova senha não pode ser igual à senha atual.");
                 }
 
+                usuarioExiste.Senha = _passwordHasher.HashPassword(dto.Senha);
             }
             _mapper.Map(dto, usuarioExiste);
 
