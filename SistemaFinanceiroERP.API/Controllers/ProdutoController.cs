@@ -2,11 +2,9 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SistemaFinanceiroERP.API.DTOs.Produto;
 using SistemaFinanceiroERP.Application.Interfaces;
 using SistemaFinanceiroERP.Domain.Entities;
-using SistemaFinanceiroERP.Infrastructure.Data;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
@@ -15,20 +13,20 @@ namespace SistemaFinanceiroERP.API.Controllers
     [Authorize]
     public class ProdutoController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProdutoRepository _repository;
         private readonly IMapper _mapper;
         private readonly IValidator<ProdutoCreateDto> _createValidator;
         private readonly IValidator<ProdutoUpdateDto> _updateValidator;
         private readonly ITenantProvider _tenantProvider;
 
         public ProdutoController(
-            AppDbContext context,
+            IProdutoRepository repository,
             IMapper mapper,
             IValidator<ProdutoCreateDto> createValidator,
             IValidator<ProdutoUpdateDto> updateValidator,
             ITenantProvider tenantProvider)
         {
-            _context = context;
+            _repository = repository;
             _mapper = mapper;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
@@ -48,10 +46,8 @@ namespace SistemaFinanceiroERP.API.Controllers
             produtoNovo.EmpresaId = _tenantProvider.GetEmpresaId();
             produtoNovo.DataCriacao = DateTime.UtcNow;
             produtoNovo.Ativo = true;
-
-            _context.Produtos.Add(produtoNovo);
-            await _context.SaveChangesAsync();
-
+            await _repository.AddAsync(produtoNovo);
+            await _repository.SaveChangesAsync();
             var response = _mapper.Map<ProdutoResponseDto>(produtoNovo);
             return CreatedAtAction(nameof(GetById), new { id = produtoNovo.Id }, response);
         }
@@ -60,7 +56,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         public async Task<ActionResult<IEnumerable<ProdutoResponseDto>>> GetAll()
         {
             // Query Filter aplica filtro automático por EmpresaId
-            var produtos = await _context.Produtos.ToListAsync();
+            var produtos = await _repository.GetAllAsync();
             var response = _mapper.Map<List<ProdutoResponseDto>>(produtos);
             return Ok(response);
         }
@@ -69,8 +65,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         public async Task<ActionResult<ProdutoResponseDto>> GetById(int id)
         {
             // Query Filter aplica filtro automático por EmpresaId
-            var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.Id == id);
-
+            var produto = await _repository.GetByIdAsync(id);
             if (produto == null)
             {
                 return NotFound();
@@ -95,8 +90,7 @@ namespace SistemaFinanceiroERP.API.Controllers
             }
 
             // Query Filter garante que só busca produtos da empresa
-            var produtoExiste = await _context.Produtos.FirstOrDefaultAsync(p => p.Id == id);
-
+            var produtoExiste = await _repository.GetByIdAsync(id);
             if (produtoExiste == null)
             {
                 return NotFound();
@@ -106,8 +100,8 @@ namespace SistemaFinanceiroERP.API.Controllers
             produtoExiste.EmpresaId = _tenantProvider.GetEmpresaId();
             produtoExiste.DataAtualizacao = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
-
+            await _repository.UpdateAsync(produtoExiste);
+            await _repository.SaveChangesAsync();
             var response = _mapper.Map<ProdutoResponseDto>(produtoExiste);
             return Ok(response);
         }
@@ -116,8 +110,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             // Query Filter garante que só busca produtos da empresa
-            var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.Id == id);
-
+            var produto = await _repository.GetByIdAsync(id);
             if (produto == null)
             {
                 return NotFound();
@@ -125,8 +118,8 @@ namespace SistemaFinanceiroERP.API.Controllers
 
             produto.Ativo = false;
             produto.DataAtualizacao = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
+            await _repository.UpdateAsync(produto);
+            await _repository.SaveChangesAsync();
             return NoContent();
         }
     }

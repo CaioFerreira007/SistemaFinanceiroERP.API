@@ -15,20 +15,20 @@ namespace SistemaFinanceiroERP.API.Controllers
     [Authorize]
     public class EmpresaController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IEmpresaRepository _repository;
         private readonly IMapper _mapper;
         private readonly IValidator<EmpresaCreateDto> _createValidator;
         private readonly IValidator<EmpresaUpdateDto> _updateValidator;
         private readonly ITenantProvider _tenantProvider;
 
         public EmpresaController(
-            AppDbContext context,
+            IEmpresaRepository repository,
             IMapper mapper,
             IValidator<EmpresaCreateDto> createValidator,
             IValidator<EmpresaUpdateDto> updateValidator,
             ITenantProvider tenantProvider)
         {
-            _context = context;
+            _repository = repository;
             _mapper = mapper;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
@@ -39,7 +39,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         public async Task<ActionResult<IEnumerable<EmpresaResponseDto>>> GetAll()
         {
             // Query Filter retorna SOMENTE a empresa do usuário logado
-            var empresas = await _context.Empresas.ToListAsync();
+            var empresas = await _repository.GetAllAsync();
             var response = _mapper.Map<List<EmpresaResponseDto>>(empresas);
             return Ok(response);
         }
@@ -48,8 +48,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         public async Task<ActionResult<EmpresaResponseDto>> GetById(int id)
         {
             // Query Filter garante que só retorna se id == empresaId do token
-            var empresa = await _context.Empresas.FirstOrDefaultAsync(e => e.Id == id);
-
+            var empresa = await _repository.GetByIdAsync(id);
             if (empresa == null)
             {
                 return NotFound();
@@ -74,8 +73,7 @@ namespace SistemaFinanceiroERP.API.Controllers
             }
 
             // Query Filter garante que só busca a própria empresa
-            var empresaExistente = await _context.Empresas.FirstOrDefaultAsync(e => e.Id == id);
-
+            var empresaExistente = await _repository.GetByIdAsync(id);
             if (empresaExistente == null)
             {
                 return NotFound();
@@ -84,8 +82,8 @@ namespace SistemaFinanceiroERP.API.Controllers
             _mapper.Map(dto, empresaExistente);
             empresaExistente.DataAtualizacao = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
-
+            await _repository.UpdateAsync(empresaExistente);
+            await _repository.SaveChangesAsync();
             var response = _mapper.Map<EmpresaResponseDto>(empresaExistente);
             return Ok(response);
         }

@@ -2,11 +2,9 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SistemaFinanceiroERP.API.DTOs.Usuario;
 using SistemaFinanceiroERP.Application.Interfaces;
 using SistemaFinanceiroERP.Domain.Entities;
-using SistemaFinanceiroERP.Infrastructure.Data;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
@@ -15,7 +13,7 @@ namespace SistemaFinanceiroERP.API.Controllers
     [Authorize]
     public class UsuarioController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUsuarioRepository _repository;
         private readonly IMapper _mapper;
         private readonly IValidator<UsuarioCreateDto> _createValidator;
         private readonly IValidator<UsuarioUpdateDto> _updateValidator;
@@ -23,14 +21,14 @@ namespace SistemaFinanceiroERP.API.Controllers
         private readonly ITenantProvider _tenantProvider;
 
         public UsuarioController(
-            AppDbContext context,
+            IUsuarioRepository repository,
             IMapper mapper,
             IValidator<UsuarioCreateDto> createValidator,
             IValidator<UsuarioUpdateDto> updateValidator,
             IPasswordHasher passwordHasher,
             ITenantProvider tenantProvider)
         {
-            _context = context;
+            _repository = repository;
             _mapper = mapper;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
@@ -52,10 +50,8 @@ namespace SistemaFinanceiroERP.API.Controllers
             usuario.Senha = _passwordHasher.HashPassword(dto.Senha);
             usuario.DataCriacao = DateTime.UtcNow;
             usuario.Ativo = true;
-
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
-
+            await _repository.AddAsync(usuario);
+            await _repository.SaveChangesAsync();
             var response = _mapper.Map<UsuarioResponseDto>(usuario);
             return CreatedAtAction(nameof(GetById), new { id = usuario.Id }, response);
         }
@@ -64,7 +60,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         public async Task<ActionResult<IEnumerable<UsuarioResponseDto>>> GetAll()
         {
             // Query Filter aplica filtro automático por EmpresaId
-            var usuarios = await _context.Usuarios.ToListAsync();
+            var usuarios = await _repository.GetAllAsync();
             var response = _mapper.Map<List<UsuarioResponseDto>>(usuarios);
             return Ok(response);
         }
@@ -73,8 +69,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         public async Task<ActionResult<UsuarioResponseDto>> GetById(int id)
         {
             // Query Filter aplica filtro automático por EmpresaId
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id);
-
+            var usuario = await _repository.GetByIdAsync(id);
             if (usuario == null)
             {
                 return NotFound();
@@ -99,8 +94,7 @@ namespace SistemaFinanceiroERP.API.Controllers
             }
 
             // Query Filter garante que só busca usuários da empresa
-            var usuarioExiste = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id);
-
+            var usuarioExiste = await _repository.GetByIdAsync(id);
             if (usuarioExiste == null)
             {
                 return NotFound();
@@ -119,9 +113,8 @@ namespace SistemaFinanceiroERP.API.Controllers
             _mapper.Map(dto, usuarioExiste);
             usuarioExiste.EmpresaId = _tenantProvider.GetEmpresaId();
             usuarioExiste.DataAtualizacao = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
+            await _repository.UpdateAsync(usuarioExiste);
+            await _repository.SaveChangesAsync();
             var response = _mapper.Map<UsuarioResponseDto>(usuarioExiste);
             return Ok(response);
         }
@@ -130,8 +123,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             // Query Filter garante que só busca usuários da empresa
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id);
-
+            var usuario = await _repository.GetByIdAsync(id);
             if (usuario == null)
             {
                 return NotFound();
@@ -139,8 +131,8 @@ namespace SistemaFinanceiroERP.API.Controllers
 
             usuario.Ativo = false;
             usuario.DataAtualizacao = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
+            await _repository.UpdateAsync(usuario);
+            await _repository.SaveChangesAsync();
             return NoContent();
         }
     }

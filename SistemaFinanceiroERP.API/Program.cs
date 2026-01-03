@@ -1,13 +1,14 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SistemaFinanceiroERP.API.Validators.Produto;
 using SistemaFinanceiroERP.Application.Interfaces;
 using SistemaFinanceiroERP.Infrastructure.Data;
+using SistemaFinanceiroERP.Infrastructure.Repositories;
 using SistemaFinanceiroERP.Infrastructure.Security;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,9 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
 // Add services to the container.
 
 builder.Services.AddControllers()
