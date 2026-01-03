@@ -47,6 +47,7 @@ namespace SistemaFinanceiroERP.API.Controllers
 
 
             var usuario = await _context.Usuarios
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(u => u.Email.ToLower() == dto.Email.ToLower());
 
             if (usuario == null)
@@ -91,6 +92,7 @@ namespace SistemaFinanceiroERP.API.Controllers
 
             // 2. Verificar Email duplicado
             var emailExiste = await _context.Usuarios
+                .IgnoreQueryFilters()
                 .AnyAsync(u => u.Email.ToLower() == dto.EmailUsuario.ToLower());
             if (emailExiste)
             {
@@ -99,6 +101,7 @@ namespace SistemaFinanceiroERP.API.Controllers
 
             // 3. Verificar CNPJ duplicado
             var cnpjExiste = await _context.Empresas
+                .IgnoreQueryFilters()
                 .AnyAsync(e => e.Cnpj == dto.Cnpj);
             if (cnpjExiste)
             {

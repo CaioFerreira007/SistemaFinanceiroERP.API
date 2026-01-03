@@ -25,8 +25,6 @@ namespace SistemaFinanceiroERP.API.Validators.Usuario
                         .NotEmpty().WithMessage("O telefone do usuário é obrigatório.")
                         .MaximumLength(15).WithMessage("O telefone do usuário não pode exceder 15 caracteres.");
 
-            RuleFor(x => x.EmpresaId)
-                        .GreaterThan(0).WithMessage("Empresa inválida.");
 
         }
     }

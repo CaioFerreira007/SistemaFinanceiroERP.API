@@ -21,7 +21,7 @@ namespace SistemaFinanceiroERP.API.Validators.Empresa
                 .WithMessage("A razão social é obrigatória.")
                 .MaximumLength(200)
                 .WithMessage("A razão social não pode exceder 200 caracteres.");
-            RuleFor(x => x.CNPJ)
+            RuleFor(x => x.Cnpj)
                 .NotEmpty()
                 .WithMessage("O CNPJ é obrigatório.")
                 .MaximumLength(18)
