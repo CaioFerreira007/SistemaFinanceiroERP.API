@@ -1,4 +1,4 @@
-﻿namespace SistemaFinanceiroERP.API.DTOs.Usuario
+﻿namespace SistemaFinanceiroERP.Application.DTOs.Usuario
 {
     public class UsuarioResponseDto
     {

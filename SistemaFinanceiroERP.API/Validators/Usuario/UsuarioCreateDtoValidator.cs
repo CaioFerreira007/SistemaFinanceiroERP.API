@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using SistemaFinanceiroERP.API.DTOs.Usuario;
+using SistemaFinanceiroERP.Application.DTOs.Usuario;
 namespace SistemaFinanceiroERP.API.Validators.Usuario
 {
     public class UsuarioCreateDtoValidator : AbstractValidator<UsuarioCreateDto>

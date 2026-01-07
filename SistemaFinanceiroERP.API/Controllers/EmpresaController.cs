@@ -2,11 +2,8 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SistemaFinanceiroERP.API.DTOs.Empresa;
+using SistemaFinanceiroERP.Application.DTOs.Empresa;
 using SistemaFinanceiroERP.Application.Interfaces;
-using SistemaFinanceiroERP.Domain.Entities;
-using SistemaFinanceiroERP.Infrastructure.Data;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {

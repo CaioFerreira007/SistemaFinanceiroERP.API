@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using SistemaFinanceiroERP.API.DTOs.Auth;
+using SistemaFinanceiroERP.Application.DTOs.Auth;
 namespace SistemaFinanceiroERP.API.Validators.Auth
 {
     public class RegisterDtoValidator: AbstractValidator<RegisterDto>

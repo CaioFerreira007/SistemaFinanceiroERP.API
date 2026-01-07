@@ -1,6 +1,6 @@
 ﻿using SistemaFinanceiroERP.Domain.Enums;
 
-namespace SistemaFinanceiroERP.API.DTOs.Empresa
+namespace SistemaFinanceiroERP.Application.DTOs.Empresa
 {
     public class EmpresaCreateDto
     {

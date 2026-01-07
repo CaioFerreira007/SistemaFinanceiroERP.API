@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using SistemaFinanceiroERP.API.DTOs.Usuario;
+using SistemaFinanceiroERP.Application.DTOs.Usuario;
 using SistemaFinanceiroERP.Domain.Entities;
 
 namespace SistemaFinanceiroERP.API.Profiles

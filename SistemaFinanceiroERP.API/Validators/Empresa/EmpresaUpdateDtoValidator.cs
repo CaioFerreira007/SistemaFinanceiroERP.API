@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using SistemaFinanceiroERP.API.DTOs.Empresa;
+using SistemaFinanceiroERP.Application.DTOs.Empresa;
 namespace SistemaFinanceiroERP.API.Validators.Empresa
 {
     public class EmpresaUpdateDtoValidator:AbstractValidator<EmpresaUpdateDto>

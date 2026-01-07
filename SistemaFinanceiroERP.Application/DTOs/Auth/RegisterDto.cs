@@ -1,6 +1,6 @@
 ﻿using SistemaFinanceiroERP.Domain.Enums;
 
-namespace SistemaFinanceiroERP.API.DTOs.Auth
+namespace SistemaFinanceiroERP.Application.DTOs.Auth
 {
     public class RegisterDto
     {
