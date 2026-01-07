@@ -10,6 +10,10 @@ namespace SistemaFinanceiroERP.Domain.Entities
     {
         public string LocalNome { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty;
+        public string Cidade { get; set; } = string.Empty;
+        public string Bairro { get; set; } = string.Empty;
+        public string Rua { get; set; } = string.Empty;
 
         //chave estrangeira para Empresa
         public int EmpresaId { get; set; }

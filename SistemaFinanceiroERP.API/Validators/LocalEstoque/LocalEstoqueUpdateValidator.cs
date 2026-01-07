@@ -16,7 +16,6 @@ namespace SistemaFinanceiroERP.API.Validators.LocalEstoque
                 .MaximumLength(100).WithMessage("O nome do local de estoque não pode exceder 100 caracteres.");
 
             RuleFor(x => x.Descricao)
-                .NotEmpty().WithMessage("A descrição do local de estoque é obrigatória.")
                 .MaximumLength(500).WithMessage("A descrição do local de estoque não pode exceder 500 caracteres.");
 
             RuleFor(x => x.Estado)
