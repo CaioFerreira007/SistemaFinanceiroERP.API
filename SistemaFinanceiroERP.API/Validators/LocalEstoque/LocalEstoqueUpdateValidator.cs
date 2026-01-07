@@ -28,7 +28,7 @@ namespace SistemaFinanceiroERP.API.Validators.LocalEstoque
 
             RuleFor(x => x.Bairro)
                 .NotEmpty().WithMessage("O bairro do local de estoque é obrigatório.")
-                .MaximumLength(20).WithMessage("O bairro do local de estoque não pode exceder 20 caracteres.");
+                .MaximumLength(100).WithMessage("O bairro do local de estoque não pode exceder 20 caracteres.");
 
             RuleFor(x => x.Rua)
                 .NotEmpty().WithMessage("A rua do local de estoque é obrigatória.")
