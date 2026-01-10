@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaFinanceiroERP.Application.DTOs.Auth;
 using SistemaFinanceiroERP.Application.DTOs.Usuario;
-using SistemaFinanceiroERP.Application.Interfaces;
+using SistemaFinanceiroERP.Domain.Interfaces;
 using SistemaFinanceiroERP.Infrastructure.Data;
 
 namespace SistemaFinanceiroERP.API.Controllers

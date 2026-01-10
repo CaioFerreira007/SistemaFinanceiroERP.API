@@ -1,5 +1,5 @@
 ﻿using BCrypt.Net;
-using SistemaFinanceiroERP.Application.Interfaces;
+using SistemaFinanceiroERP.Domain.Interfaces;
 
 namespace SistemaFinanceiroERP.Infrastructure.Security
 {

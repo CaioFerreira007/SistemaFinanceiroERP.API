@@ -2,12 +2,14 @@
 using SistemaFinanceiroERP.Domain.Entities;
 using SistemaFinanceiroERP.Infrastructure.Data;
 
+
 namespace SistemaFinanceiroERP.Infrastructure.Repositories
 {
-    public class EmpresaRepository : Repository<Empresa>, IEmpresaRepository
+    public class LocalEstoqueRepository :Repository<LocalEstoque>, ILocalEstoqueRepository
     {
-        public EmpresaRepository(AppDbContext context) : base(context)
+        public LocalEstoqueRepository(AppDbContext context) : base(context)
         {
+
         }
     }
 }

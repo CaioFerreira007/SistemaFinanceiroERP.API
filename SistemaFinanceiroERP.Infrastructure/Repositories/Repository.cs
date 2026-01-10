@@ -1,4 +1,4 @@
-﻿using SistemaFinanceiroERP.Application.Interfaces;
+﻿using SistemaFinanceiroERP.Domain.Interfaces;
 using SistemaFinanceiroERP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SistemaFinanceiroERP.Application.Interfaces;
+using SistemaFinanceiroERP.Domain.Interfaces;
 using SistemaFinanceiroERP.Domain.Entities;
 
 namespace SistemaFinanceiroERP.Infrastructure.Data

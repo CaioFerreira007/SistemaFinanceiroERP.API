@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using SistemaFinanceiroERP.Application.Interfaces;
+using SistemaFinanceiroERP.Domain.Interfaces;
 using System.Security.Claims;
 
 namespace SistemaFinanceiroERP.Infrastructure.Security

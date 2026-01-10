@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using SistemaFinanceiroERP.API.Validators.Produto;
-using SistemaFinanceiroERP.Application.Interfaces;
+using SistemaFinanceiroERP.Application.Validators.Produto;
+using SistemaFinanceiroERP.Domain.Interfaces;
 using SistemaFinanceiroERP.Infrastructure.Data;
 using SistemaFinanceiroERP.Infrastructure.Repositories;
 using SistemaFinanceiroERP.Infrastructure.Security;
@@ -29,6 +29,7 @@ builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
+builder.Services.AddScoped<ILocalEstoqueRepository, LocalEstoqueRepository>();
 // Add services to the container.
 
 builder.Services.AddControllers()
