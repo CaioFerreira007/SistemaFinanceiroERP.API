@@ -9,17 +9,14 @@ namespace SistemaFinanceiroERP.Application.Profiles
         public ProdutoProfile()
         {
             // Create
-            CreateMap<ProdutoCreateDto, Produto>()
-                .ForMember(dest => dest.ProdutoNome, opt => opt.MapFrom(src => src.ProdutoNome));
+            CreateMap<ProdutoCreateDto, Produto>();
 
             // Update
-            CreateMap<ProdutoUpdateDto, Produto>()
-                .ForMember(dest => dest.ProdutoNome, opt => opt.MapFrom(src => src.ProdutoNome));
+            CreateMap<ProdutoUpdateDto, Produto>();
 
             // Response
-            CreateMap<Produto, ProdutoResponseDto>()
-                .ForMember(dest => dest.QuantidadeEstoque,
-                           opt => opt.MapFrom(src => src.QuantidadeEstoqueTotal));
+            CreateMap<Produto, ProdutoResponseDto>().ForMember(dest => dest.QuantidadeEstoque,
+               opt => opt.MapFrom(src => src.QuantidadeEstoqueTotal));
         }
     }
 }

@@ -7,7 +7,6 @@ namespace SistemaFinanceiroERP.Domain.Enums
         Entrada = 1,
         Saida = 2,
         Transferencia = 3,
-        Ajuste = 5,
-        Transacao = 6
+        Ajuste = 4,
     }
 }

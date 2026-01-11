@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SistemaFinanceiroERP.Application.DTOs.MovimentacaoEstoque;
 using SistemaFinanceiroERP.Domain.Entities;
@@ -10,6 +11,7 @@ namespace SistemaFinanceiroERP.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MovimentacaoEstoqueController : ControllerBase
     {
         private readonly IMovimentacaoEstoqueRepository _repository;

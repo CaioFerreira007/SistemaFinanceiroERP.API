@@ -25,8 +25,7 @@ namespace SistemaFinanceiroERP.Application.Validators.Produto
                 .NotEmpty().WithMessage("O código de barras é obrigatório.")
                 .MaximumLength(50).WithMessage("O código de barras não pode exceder 50 caracteres.");
 
-            RuleFor(x => x.QuantidadeEstoque)
-                .GreaterThanOrEqualTo(0).WithMessage("A quantidade em estoque não pode ser negativa.");
+           
 
             RuleFor(x => x.UnidadeMedida)
                 .NotEmpty().WithMessage("A unidade de medida é obrigatória.")
