@@ -25,6 +25,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<LocalEstoque> LocaisEstoque { get; set; }
         public DbSet<ProdutoLocalEstoque> ProdutosLocaisEstoque { get; set; }
+        public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
