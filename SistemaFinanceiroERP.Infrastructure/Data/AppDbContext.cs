@@ -26,6 +26,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
         public DbSet<LocalEstoque> LocaisEstoque { get; set; }
         public DbSet<ProdutoLocalEstoque> ProdutosLocaisEstoque { get; set; }
         public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
+        public DbSet<AjusteEstoque> AjusteEstoque { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -70,7 +71,11 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
                 modelBuilder.Entity<ProdutoLocalEstoque>()
                     .HasQueryFilter(pl => pl.EmpresaId == _tenantProvider.GetEmpresaId());
 
+                modelBuilder.Entity<MovimentacaoEstoque>()
+    .HasQueryFilter(m => m.EmpresaId == _tenantProvider.GetEmpresaId());
 
+                modelBuilder.Entity<AjusteEstoque>()
+                    .HasQueryFilter(a => a.EmpresaId == _tenantProvider.GetEmpresaId());
 
             }
         }

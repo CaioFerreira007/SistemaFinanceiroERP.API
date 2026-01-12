@@ -48,7 +48,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ProdutoId = table.Column<int>(type: "int", nullable: false),
                     LocalEstoqueId = table.Column<int>(type: "int", nullable: false),
-                    QuantidadeNoLocal = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    QuantidadeNoLocal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     EmpresaId = table.Column<int>(type: "int", nullable: false),
                     DataCriacao = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     DataAtualizacao = table.Column<DateTime>(type: "datetime(6)", nullable: false),

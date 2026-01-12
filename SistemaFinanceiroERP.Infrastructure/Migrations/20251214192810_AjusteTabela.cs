@@ -16,7 +16,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Migrations
                 type: "decimal(18,2)",
                 nullable: false ,
                 oldClrType: typeof(decimal),
-                oldType: "decimal(65,30)");
+                oldType: "decimal(18,2)");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "DataCriacao",
@@ -73,7 +73,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Migrations
             migrationBuilder.AlterColumn<decimal>(
                 name: "PrecoUnitario",
                 table: "produtos",
-                type: "decimal(65,30)",
+                type: "decimal(18,2)",
                 nullable: false,
                 oldClrType: typeof(decimal),
                 oldType: "decimal(18,2)");

@@ -15,3 +15,4 @@ namespace SistemaFinanceiroERP.Application.DTOs.MovimentacaoEstoque
         public DateTime DataMovimentacao { get; set; }
     }
 }
+

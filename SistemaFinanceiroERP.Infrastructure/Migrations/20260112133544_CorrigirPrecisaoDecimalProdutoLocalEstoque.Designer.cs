@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SistemaFinanceiroERP.Infrastructure.Data;
 
@@ -10,70 +11,16 @@ using SistemaFinanceiroERP.Infrastructure.Data;
 namespace SistemaFinanceiroERP.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260112133544_CorrigirPrecisaoDecimalProdutoLocalEstoque")]
+    partial class CorrigirPrecisaoDecimalProdutoLocalEstoque
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
-
-            modelBuilder.Entity("SistemaFinanceiroERP.Domain.Entities.AjusteEstoque", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<DateTime>("DataAtualizacao")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("DataDoAjuste")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<decimal>("Diferenca")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LocalEstoqueId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Observacao")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("ProdutoId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("QuantidadeAnterior")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal>("QuantidadeNova")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmpresaId");
-
-                    b.HasIndex("LocalEstoqueId");
-
-                    b.HasIndex("ProdutoId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("AjusteEstoque");
-                });
 
             modelBuilder.Entity("SistemaFinanceiroERP.Domain.Entities.Empresa", b =>
                 {
@@ -344,41 +291,6 @@ namespace SistemaFinanceiroERP.Infrastructure.Migrations
                     b.HasIndex("EmpresaId");
 
                     b.ToTable("Usuarios");
-                });
-
-            modelBuilder.Entity("SistemaFinanceiroERP.Domain.Entities.AjusteEstoque", b =>
-                {
-                    b.HasOne("SistemaFinanceiroERP.Domain.Entities.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("EmpresaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SistemaFinanceiroERP.Domain.Entities.LocalEstoque", "LocalEstoque")
-                        .WithMany()
-                        .HasForeignKey("LocalEstoqueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SistemaFinanceiroERP.Domain.Entities.Produto", "Produto")
-                        .WithMany()
-                        .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SistemaFinanceiroERP.Domain.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Empresa");
-
-                    b.Navigation("LocalEstoque");
-
-                    b.Navigation("Produto");
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("SistemaFinanceiroERP.Domain.Entities.LocalEstoque", b =>
