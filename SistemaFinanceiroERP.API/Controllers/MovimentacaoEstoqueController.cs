@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using SistemaFinanceiroERP.Application.DTOs.MovimentacaoEstoque;
 using SistemaFinanceiroERP.Domain.Entities;
 using SistemaFinanceiroERP.Domain.Interfaces;
-using System.Security.Claims;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
@@ -18,6 +17,7 @@ namespace SistemaFinanceiroERP.API.Controllers
         private readonly IMapper _mapper;
         private readonly IValidator<MovimentacaoEstoqueCreateDto> _createValidator;
         private readonly ITenantProvider _tenantProvider;
+
         public MovimentacaoEstoqueController(
             IMovimentacaoEstoqueRepository repository,
             IMapper mapper,
@@ -31,75 +31,61 @@ namespace SistemaFinanceiroERP.API.Controllers
         }
 
         [HttpPost]
-
         public async Task<ActionResult<MovimentacaoEstoqueResponseDto>> Create([FromBody] MovimentacaoEstoqueCreateDto dto)
         {
             var validationResult = await _createValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
                 return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
-            }
-            var movimentacaoEstoqueNova = _mapper.Map<MovimentacaoEstoque>(dto);
-            movimentacaoEstoqueNova.EmpresaId = _tenantProvider.GetEmpresaId();
-            movimentacaoEstoqueNova.DataCriacao = DateTime.UtcNow;
-            movimentacaoEstoqueNova.Ativo = true;
-            var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(usuarioIdClaim))
-                return Unauthorized("Usuário não identificado");
 
-            movimentacaoEstoqueNova.UsuarioId = int.Parse(usuarioIdClaim);
+            var mov = _mapper.Map<MovimentacaoEstoque>(dto);
+            mov.EmpresaId = _tenantProvider.GetEmpresaId();
+            mov.UsuarioId = _tenantProvider.GetUsuarioId();
+
             try
             {
-                await _repository.RegistrarMovimentacaoAsync(movimentacaoEstoqueNova);
-
+                await _repository.RegistrarMovimentacaoAsync(mov);
             }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
             }
-            var response = _mapper.Map<MovimentacaoEstoqueResponseDto>(movimentacaoEstoqueNova);
 
-            return CreatedAtAction(nameof(GetById), new { id = movimentacaoEstoqueNova.Id }, response);
+            var response = _mapper.Map<MovimentacaoEstoqueResponseDto>(mov);
+            return CreatedAtAction(nameof(GetById), new { id = mov.Id }, response);
         }
-
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetAll()
         {
-            var movimentacoesEstoque = await _repository.GetAllAsync();
-            var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movimentacoesEstoque);
+            var movs = await _repository.GetAllAsync();
+            var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movs);
             return Ok(response);
         }
 
-
-
-        [HttpGet("{id}")]
-
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<MovimentacaoEstoqueResponseDto>> GetById(int id)
         {
-            var movimentacaoEstoque = await _repository.GetByIdAsync(id);
-            if (movimentacaoEstoque == null)
-            {
-                return NotFound();
-            }
-            var response = _mapper.Map<MovimentacaoEstoqueResponseDto>(movimentacaoEstoque);
+            var mov = await _repository.GetByIdAsync(id);
+            if (mov == null) return NotFound();
+
+            var response = _mapper.Map<MovimentacaoEstoqueResponseDto>(mov);
             return Ok(response);
         }
-        [HttpGet("produto/{id}")]
+
+        [HttpGet("produto/{id:int}")]
         public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByProduto(int id)
         {
-            var movimentacoesEstoque = await _repository.GetByProdutoAsync(id);
-            var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movimentacoesEstoque);
+            var movs = await _repository.GetByProdutoAsync(id);
+            var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movs);
             return Ok(response);
         }
 
-        [HttpGet("local/{id}")]
+        [HttpGet("local/{id:int}")]
         public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByLocalEstoque(int id)
         {
-            var movimentacoesEstoque = await _repository.GetByLocalEstoqueAsync(id);
-            var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movimentacoesEstoque);
+            var movs = await _repository.GetByLocalEstoqueAsync(id);
+            var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movs);
             return Ok(response);
         }
-
     }
 }

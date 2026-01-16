@@ -29,7 +29,7 @@ namespace SistemaFinanceiroERP.Application.Validators.LocalEstoque
             RuleFor(x => x.Rua)
                 .NotEmpty().WithMessage("A rua do local de estoque é obrigatória.")
                 .MaximumLength(100).WithMessage("A rua do local de estoque não pode exceder 100 caracteres.");
-
+            
 
 
         }

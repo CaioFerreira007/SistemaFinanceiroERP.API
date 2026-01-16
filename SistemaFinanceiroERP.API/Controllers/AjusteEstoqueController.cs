@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using SistemaFinanceiroERP.Application.DTOs.AjusteEstoque;
 using SistemaFinanceiroERP.Domain.Entities;
 using SistemaFinanceiroERP.Domain.Interfaces;
-using System.Security.Claims;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
@@ -19,8 +18,10 @@ namespace SistemaFinanceiroERP.API.Controllers
         private readonly IValidator<AjusteEstoqueCreateDto> _createValidator;
         private readonly ITenantProvider _tenantProvider;
 
-        public AjusteEstoqueController(IAjusteEstoqueRepository repository,
-            IMapper mapper, IValidator<AjusteEstoqueCreateDto> createValidator,
+        public AjusteEstoqueController(
+            IAjusteEstoqueRepository repository,
+            IMapper mapper,
+            IValidator<AjusteEstoqueCreateDto> createValidator,
             ITenantProvider tenantProvider)
         {
             _repository = repository;
@@ -28,75 +29,62 @@ namespace SistemaFinanceiroERP.API.Controllers
             _createValidator = createValidator;
             _tenantProvider = tenantProvider;
         }
-        [HttpPost]
 
-        public async Task<ActionResult<AjusteEstoqueCreateDto>> Create([FromBody] AjusteEstoqueCreateDto dto)
+        [HttpPost]
+        public async Task<ActionResult<AjusteEstoqueResponseDto>> Create([FromBody] AjusteEstoqueCreateDto dto)
         {
             var validationResult = await _createValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
                 return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
-            }
-            var ajusteEstoqueNovo = _mapper.Map<AjusteEstoque>(dto);
-            ajusteEstoqueNovo.EmpresaId = _tenantProvider.GetEmpresaId();
 
-            var usuarioClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(usuarioClaim))
-            {
-                return Unauthorized("Usuário não identificado!");
-            }
-            ajusteEstoqueNovo.UsuarioId = int.Parse(usuarioClaim);
+            var ajusteNovo = _mapper.Map<AjusteEstoque>(dto);
+            ajusteNovo.EmpresaId = _tenantProvider.GetEmpresaId();
+            ajusteNovo.UsuarioId = _tenantProvider.GetUsuarioId();
+
             try
             {
-                var ajusteCriado = await _repository.RegistrarAjusteEstoqueAsync(ajusteEstoqueNovo);
-
-
+                var ajusteCriado = await _repository.RegistrarAjusteEstoqueAsync(ajusteNovo);
                 var response = _mapper.Map<AjusteEstoqueResponseDto>(ajusteCriado);
-
                 return CreatedAtAction(nameof(GetById), new { id = ajusteCriado.Id }, response);
-            } catch (InvalidOperationException ex)
+            }
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
             }
         }
 
         [HttpGet]
-
         public async Task<ActionResult<IEnumerable<AjusteEstoqueResponseDto>>> GetAll()
         {
-            var ajustesEstoque = await _repository.GetAllAsync();
-            var response = _mapper.Map<IEnumerable<AjusteEstoqueResponseDto>>(ajustesEstoque);
+            var ajustes = await _repository.GetAllAsync();
+            var response = _mapper.Map<IEnumerable<AjusteEstoqueResponseDto>>(ajustes);
             return Ok(response);
         }
 
-
-        [HttpGet("{id}")]
-
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<AjusteEstoqueResponseDto>> GetById(int id)
         {
-            var ajusteEstoque = await _repository.GetByIdAsync(id);
-            if (ajusteEstoque == null)
-            {
-                return NotFound();
-            }
-            var response = _mapper.Map<AjusteEstoqueResponseDto>(ajusteEstoque);
-            return Ok(response);
-        }
-        [HttpGet("produto/{produtoId}")]
-        public async Task<ActionResult<IEnumerable<AjusteEstoqueResponseDto>>> GetByProduto(int produtoId)
-        {
-            var ajustesEstoque = await _repository.GetByProdutoIdAsync(produtoId);
-            var response = _mapper.Map<IEnumerable<AjusteEstoqueResponseDto>>(ajustesEstoque);
+            var ajuste = await _repository.GetByIdAsync(id);
+            if (ajuste == null) return NotFound();
+
+            var response = _mapper.Map<AjusteEstoqueResponseDto>(ajuste);
             return Ok(response);
         }
 
-        [HttpGet("localEstoque/{localEstoqueId}")]
+        [HttpGet("produto/{produtoId:int}")]
+        public async Task<ActionResult<IEnumerable<AjusteEstoqueResponseDto>>> GetByProduto(int produtoId)
+        {
+            var ajustes = await _repository.GetByProdutoIdAsync(produtoId);
+            var response = _mapper.Map<IEnumerable<AjusteEstoqueResponseDto>>(ajustes);
+            return Ok(response);
+        }
+
+        [HttpGet("localEstoque/{localEstoqueId:int}")]
         public async Task<ActionResult<IEnumerable<AjusteEstoqueResponseDto>>> GetByLocalEstoque(int localEstoqueId)
         {
-            var ajustesEstoque = await _repository.GetByLocalEstoqueIdAsync(localEstoqueId);
-            var response = _mapper.Map<IEnumerable<AjusteEstoqueResponseDto>>(ajustesEstoque);
+            var ajustes = await _repository.GetByLocalEstoqueIdAsync(localEstoqueId);
+            var response = _mapper.Map<IEnumerable<AjusteEstoqueResponseDto>>(ajustes);
             return Ok(response);
         }
     }
 }
-

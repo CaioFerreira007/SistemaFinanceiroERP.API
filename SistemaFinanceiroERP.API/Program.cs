@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SistemaFinanceiroERP.Application.Validators.Produto;
-using SistemaFinanceiroERP.Domain.Entities;
+using System.Text.Json.Serialization;
 using SistemaFinanceiroERP.Domain.Interfaces;
 using SistemaFinanceiroERP.Infrastructure.Data;
 using SistemaFinanceiroERP.Infrastructure.Repositories;
@@ -32,14 +32,23 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
 builder.Services.AddScoped<ILocalEstoqueRepository, LocalEstoqueRepository>();
 builder.Services.AddScoped<IMovimentacaoEstoqueRepository, MovimentacaoEstoqueRepository>();
-builder.Services.AddScoped<IAjusteEstoqueRepository, AjusteEstoqueRepository>();
+builder.Services.AddScoped<IAjusteEstoqueRepository, AjusteEstoqueRepository>();    
 // Add services to the container.
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    
     });
+
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 
 builder.Services.AddValidatorsFromAssemblyContaining<ProdutoCreateDtoValidator>();
 

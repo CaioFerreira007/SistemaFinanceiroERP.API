@@ -3,15 +3,14 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SistemaFinanceiroERP.Application.DTOs.LocalEstoque;
-using SistemaFinanceiroERP.Domain.Interfaces;
 using SistemaFinanceiroERP.Domain.Entities;
+using SistemaFinanceiroERP.Domain.Interfaces;
 
 namespace SistemaFinanceiroERP.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-
     public class LocalEstoqueController : ControllerBase
     {
         private readonly ILocalEstoqueRepository _repository;
@@ -20,7 +19,9 @@ namespace SistemaFinanceiroERP.API.Controllers
         private readonly IValidator<LocalEstoqueUpdateDto> _updateValidator;
         private readonly ITenantProvider _tenantProvider;
 
-        public LocalEstoqueController(ILocalEstoqueRepository repository, IMapper mapper,
+        public LocalEstoqueController(
+            ILocalEstoqueRepository repository,
+            IMapper mapper,
             IValidator<LocalEstoqueCreateDto> createValidator,
             IValidator<LocalEstoqueUpdateDto> updateValidator,
             ITenantProvider tenantProvider)
@@ -37,87 +38,74 @@ namespace SistemaFinanceiroERP.API.Controllers
         {
             var validationResult = await _createValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
                 return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
-            }
-            var localEstoqueNovo = _mapper.Map<LocalEstoque>(dto);
-            localEstoqueNovo.EmpresaId = _tenantProvider.GetEmpresaId();
-            localEstoqueNovo.DataCriacao = DateTime.UtcNow;
-            localEstoqueNovo.Ativo = true;
-            await _repository.AddAsync(localEstoqueNovo);
-            await _repository.SaveChangesAsync();
-            var response = _mapper.Map<LocalEstoqueResponseDto>(localEstoqueNovo);
-            return CreatedAtAction(nameof(GetById), new { id = localEstoqueNovo.Id }, response);
 
+            var localNovo = _mapper.Map<LocalEstoque>(dto);
+            localNovo.EmpresaId = _tenantProvider.GetEmpresaId();
+
+            await _repository.AddAsync(localNovo);
+            await _repository.SaveChangesAsync();
+
+            var response = _mapper.Map<LocalEstoqueResponseDto>(localNovo);
+            return CreatedAtAction(nameof(GetById), new { id = localNovo.Id }, response);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LocalEstoqueResponseDto>>> GetAll()
         {
-            var locaisEstoque = await _repository.GetAllAsync();
-            var response = _mapper.Map<List<LocalEstoqueResponseDto>>(locaisEstoque);
+            var locais = await _repository.GetAllAsync();
+            var response = _mapper.Map<List<LocalEstoqueResponseDto>>(locais);
             return Ok(response);
         }
 
-        [HttpGet("{id}")]
-
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<LocalEstoqueResponseDto>> GetById(int id)
         {
-            var localEstoque = await _repository.GetByIdAsync(id);
-            if (localEstoque == null)
-            {
-                return NotFound();
-            }
-            var response = _mapper.Map<LocalEstoqueResponseDto>(localEstoque);
+            var local = await _repository.GetByIdAsync(id);
+            if (local == null) return NotFound();
+
+            var response = _mapper.Map<LocalEstoqueResponseDto>(local);
             return Ok(response);
         }
 
-        [HttpPut("{id}")]
-
+        [HttpPut("{id:int}")]
         public async Task<ActionResult<LocalEstoqueResponseDto>> Update(int id, [FromBody] LocalEstoqueUpdateDto dto)
         {
             var validationResult = await _updateValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
                 return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
-            }
 
             if (id != dto.Id)
-            {
-                return BadRequest("O id da URL não corresponde ao id do produto");
-            }
+                return BadRequest("O id da URL não corresponde ao id do local");
 
-            var localEstoqueExistente = await _repository.GetByIdAsync(id);
-            if (localEstoqueExistente == null)
-            {
-                return NotFound();
-            }
-            _mapper.Map(dto, localEstoqueExistente);
-            localEstoqueExistente.DataAtualizacao = DateTime.UtcNow;
-            await _repository.UpdateAsync(localEstoqueExistente);
+            var existente = await _repository.GetByIdAsync(id);
+            if (existente == null) return NotFound();
+
+            _mapper.Map(dto, existente);
+
+            await _repository.UpdateAsync(existente);
             await _repository.SaveChangesAsync();
-            var response = _mapper.Map<LocalEstoqueResponseDto>(localEstoqueExistente);
-            return Ok(response);
 
+            var response = _mapper.Map<LocalEstoqueResponseDto>(existente);
+            return Ok(response);
         }
 
-        [HttpDelete("{id}")]
-
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            // Query Filter garante que só busca produtos da empresa
-            var localEstoque = await _repository.GetByIdAsync(id);
-            if (localEstoque == null)
-            {
-                return NotFound();
-            }
+            var local = await _repository.GetByIdAsync(id);
+            if (local == null) return NotFound();
 
-            localEstoque.Ativo = false;
-            localEstoque.DataAtualizacao = DateTime.UtcNow;
-            await _repository.UpdateAsync(localEstoque);
+            // ✅ Validação: não permitir deletar LocalEstoque com Produto associado
+            var temProdutos = await _repository.HasProdutosAssociadosAsync(id);
+            if (temProdutos)
+                return BadRequest("Não é possível deletar este Local de Estoque: existem produtos associados a ele.");
+
+            local.Ativo = false;
+            await _repository.UpdateAsync(local);
             await _repository.SaveChangesAsync();
-            return NoContent();
 
+            return NoContent();
         }
     }
 }

@@ -2,6 +2,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SistemaFinanceiroERP.Application.DTOs.MovimentacaoEstoque;
 using SistemaFinanceiroERP.Application.DTOs.Produto;
 using SistemaFinanceiroERP.Domain.Entities;
 using SistemaFinanceiroERP.Domain.Interfaces;
@@ -14,19 +15,22 @@ namespace SistemaFinanceiroERP.API.Controllers
     public class ProdutoController : ControllerBase
     {
         private readonly IProdutoRepository _repository;
+        private readonly IMovimentacaoEstoqueRepository _movRepository;
         private readonly IMapper _mapper;
         private readonly IValidator<ProdutoCreateDto> _createValidator;
-        private readonly IValidator<ProdutoUpdateDto> _updateValidator; 
+        private readonly IValidator<ProdutoUpdateDto> _updateValidator;
         private readonly ITenantProvider _tenantProvider;
 
         public ProdutoController(
             IProdutoRepository repository,
+            IMovimentacaoEstoqueRepository movRepository,
             IMapper mapper,
             IValidator<ProdutoCreateDto> createValidator,
             IValidator<ProdutoUpdateDto> updateValidator,
             ITenantProvider tenantProvider)
         {
             _repository = repository;
+            _movRepository = movRepository;
             _mapper = mapper;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
@@ -38,14 +42,10 @@ namespace SistemaFinanceiroERP.API.Controllers
         {
             var validationResult = await _createValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
                 return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
-            }
 
             var produtoNovo = _mapper.Map<Produto>(dto);
             produtoNovo.EmpresaId = _tenantProvider.GetEmpresaId();
-            produtoNovo.DataCriacao = DateTime.UtcNow;
-            produtoNovo.Ativo = true;
 
             await _repository.AddAsync(produtoNovo);
             await _repository.SaveChangesAsync();
@@ -62,40 +62,43 @@ namespace SistemaFinanceiroERP.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ProdutoResponseDto>> GetById(int id)
         {
             var produto = await _repository.GetByIdAsync(id);
-            if (produto == null)
-                return NotFound();
+            if (produto == null) return NotFound();
 
             var response = _mapper.Map<ProdutoResponseDto>(produto);
             return Ok(response);
         }
 
-        [HttpPut("{id}")]
+        // ✅ ROADMAP: GET /produto/{id}/movimentacoes
+        [HttpGet("{id:int}/movimentacoes")]
+        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetMovimentacoes(int id)
+        {
+            var produto = await _repository.GetByIdAsync(id);
+            if (produto == null) return NotFound("Produto não encontrado.");
+
+            var movs = await _movRepository.GetByProdutoAsync(id);
+            var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movs);
+            return Ok(response);
+        }
+
+        [HttpPut("{id:int}")]
         public async Task<ActionResult<ProdutoResponseDto>> Update(int id, [FromBody] ProdutoUpdateDto dto)
         {
             var validationResult = await _updateValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
                 return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
-            }
 
             if (id != dto.Id)
-            {
                 return BadRequest("O id da URL não corresponde ao id do produto");
-            }
 
             var produtoExiste = await _repository.GetByIdAsync(id);
-            if (produtoExiste == null)
-            {
-                return NotFound();
-            }
+            if (produtoExiste == null) return NotFound();
 
             _mapper.Map(dto, produtoExiste);
             produtoExiste.EmpresaId = _tenantProvider.GetEmpresaId();
-            produtoExiste.DataAtualizacao = DateTime.UtcNow;
 
             await _repository.UpdateAsync(produtoExiste);
             await _repository.SaveChangesAsync();
@@ -104,17 +107,18 @@ namespace SistemaFinanceiroERP.API.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
             var produto = await _repository.GetByIdAsync(id);
-            if (produto == null)
-            {
-                return NotFound();
-            }
+            if (produto == null) return NotFound();
+
+            // ✅ Validação: não permitir deletar Produto com movimentações
+            var temMov = await _repository.HasMovimentacoesAsync(id);
+            if (temMov)
+                return BadRequest("Não é possível deletar este Produto: existem movimentações de estoque vinculadas a ele.");
 
             produto.Ativo = false;
-            produto.DataAtualizacao = DateTime.UtcNow;
             await _repository.UpdateAsync(produto);
             await _repository.SaveChangesAsync();
 

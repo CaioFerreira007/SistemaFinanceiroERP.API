@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SistemaFinanceiroERP.Domain.Interfaces;
 using SistemaFinanceiroERP.Domain.Entities;
+using SistemaFinanceiroERP.Domain.Interfaces;
 
 namespace SistemaFinanceiroERP.Infrastructure.Data
 {
@@ -14,6 +14,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
             _tenantProvider = tenantProvider;
         }
 
+        // Design-time / migrations
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
@@ -26,14 +27,15 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
         public DbSet<LocalEstoque> LocaisEstoque { get; set; }
         public DbSet<ProdutoLocalEstoque> ProdutosLocaisEstoque { get; set; }
         public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
-        public DbSet<AjusteEstoque> AjusteEstoque { get; set; }
+        public DbSet<AjusteEstoque> AjustesEstoque { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-
-
+            // =========================
+            // RELACIONAMENTOS
+            // =========================
             modelBuilder.Entity<ProdutoLocalEstoque>()
                 .HasOne(pl => pl.Produto)
                 .WithMany(p => p.ProdutosLocaisEstoque)
@@ -54,29 +56,83 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(l => l.EmpresaId);
 
-            if (_tenantProvider != null)
+            // =========================
+            // ✅ FAIL-SAFE TENANT ID
+            // Se não tem usuário/token (login/register), empresaId = 0
+            // Assim NÃO EXPLODE o model building.
+            // =========================
+            var empresaId = GetEmpresaIdSafe();
+
+            // =========================
+            // QUERY FILTERS (Multi-tenant + Soft Delete)
+            // =========================
+            modelBuilder.Entity<Produto>()
+                .HasQueryFilter(p => p.EmpresaId == empresaId && p.Ativo);
+
+            modelBuilder.Entity<Usuario>()
+                .HasQueryFilter(u => u.EmpresaId == empresaId && u.Ativo);
+
+            modelBuilder.Entity<Empresa>()
+                .HasQueryFilter(e => e.Id == empresaId && e.Ativo);
+
+            modelBuilder.Entity<LocalEstoque>()
+                .HasQueryFilter(l => l.EmpresaId == empresaId && l.Ativo);
+
+            modelBuilder.Entity<ProdutoLocalEstoque>()
+                .HasQueryFilter(pl => pl.EmpresaId == empresaId && pl.Ativo);
+
+            modelBuilder.Entity<MovimentacaoEstoque>()
+                .HasQueryFilter(m => m.EmpresaId == empresaId && m.Ativo);
+
+            modelBuilder.Entity<AjusteEstoque>()
+                .HasQueryFilter(a => a.EmpresaId == empresaId && a.Ativo);
+        }
+
+        private int GetEmpresaIdSafe()
+        {
+            try
             {
-                modelBuilder.Entity<Produto>()
-                    .HasQueryFilter(p => p.EmpresaId == _tenantProvider.GetEmpresaId());
+                if (_tenantProvider == null) return 0;
+                return _tenantProvider.GetEmpresaId();
+            }
+            catch
+            {
+                // Sem token / sem usuário autenticado
+                return 0;
+            }
+        }
 
-                modelBuilder.Entity<Usuario>()
-                    .HasQueryFilter(u => u.EmpresaId == _tenantProvider.GetEmpresaId());
+        // =========================
+        // AUDITORIA CENTRALIZADA UTC
+        // =========================
+        public override int SaveChanges()
+        {
+            ApplyAudit();
+            return base.SaveChanges();
+        }
 
-                modelBuilder.Entity<Empresa>()
-                    .HasQueryFilter(e => e.Id == _tenantProvider.GetEmpresaId());
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            ApplyAudit();
+            return base.SaveChangesAsync(cancellationToken);
+        }
 
-                modelBuilder.Entity<LocalEstoque>()
-                    .HasQueryFilter(l => l.EmpresaId == _tenantProvider.GetEmpresaId());
+        private void ApplyAudit()
+        {
+            var now = DateTime.UtcNow;
 
-                modelBuilder.Entity<ProdutoLocalEstoque>()
-                    .HasQueryFilter(pl => pl.EmpresaId == _tenantProvider.GetEmpresaId());
-
-                modelBuilder.Entity<MovimentacaoEstoque>()
-    .HasQueryFilter(m => m.EmpresaId == _tenantProvider.GetEmpresaId());
-
-                modelBuilder.Entity<AjusteEstoque>()
-                    .HasQueryFilter(a => a.EmpresaId == _tenantProvider.GetEmpresaId());
-
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.DataCriacao = now;
+                    entry.Entity.DataAtualizacao = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Property(e => e.DataCriacao).IsModified = false;
+                    entry.Entity.DataAtualizacao = now;
+                }
             }
         }
     }

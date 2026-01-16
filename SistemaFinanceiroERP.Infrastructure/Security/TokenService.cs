@@ -1,35 +1,43 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using SistemaFinanceiroERP.Domain.Entities;
+using SistemaFinanceiroERP.Domain.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using SistemaFinanceiroERP.Domain.Interfaces;
-using SistemaFinanceiroERP.Domain.Entities;
 
 namespace SistemaFinanceiroERP.Infrastructure.Security
 {
     public class TokenService : ITokenService
     {
-
         private readonly IConfiguration _configuration;
+
         public TokenService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
+
         public string GerarToken(Usuario usuario)
         {
-
             var claims = new[]
             {
+                // sub = id do usuário
                 new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
+
+                // compatibilidade com ClaimTypes.NameIdentifier
+                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+
                 new Claim(JwtRegisteredClaimNames.UniqueName, usuario.UsuarioNome),
                 new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
+
+                // empresa do usuário logado
                 new Claim("EmpresaId", usuario.EmpresaId.ToString()),
+
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-            var chaveSecreta = _configuration["Jwt:SecretKey"]
 
-       ?? throw new InvalidOperationException("Jwt:SecretKey não configurada!");
+            var chaveSecreta = _configuration["Jwt:SecretKey"]
+                ?? throw new InvalidOperationException("Jwt:SecretKey não configurada!");
 
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
@@ -47,8 +55,6 @@ namespace SistemaFinanceiroERP.Infrastructure.Security
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-
         }
-
     }
 }

@@ -15,29 +15,35 @@ namespace SistemaFinanceiroERP.Infrastructure.Security
 
         public int GetEmpresaId()
         {
-            var empresaIdClaim = _httpContextAccessor.HttpContext?.User
-                .FindFirst("EmpresaId")?.Value;
+            var user = _httpContextAccessor.HttpContext?.User;
 
-            if (string.IsNullOrEmpty(empresaIdClaim))
-            {
-                throw new UnauthorizedAccessException("EmpresaId não encontrado no token.");
-            }
+            if (user == null || user.Identity?.IsAuthenticated != true)
+                throw new UnauthorizedAccessException("Usuário não autenticado.");
 
-            return int.Parse(empresaIdClaim);
+            var empresaIdStr = user.FindFirst("EmpresaId")?.Value;
+
+            if (string.IsNullOrWhiteSpace(empresaIdStr) || !int.TryParse(empresaIdStr, out var empresaId))
+                throw new UnauthorizedAccessException("Claim EmpresaId inválida no token.");
+
+            return empresaId;
         }
 
         public int GetUsuarioId()
         {
-            var usuarioIdClaim = _httpContextAccessor.HttpContext?.User
-                .FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value;
+            var user = _httpContextAccessor.HttpContext?.User;
 
-            if (string.IsNullOrEmpty(usuarioIdClaim))
-            {
-                throw new UnauthorizedAccessException("UsuarioId não encontrado no token.");
-            }
+            if (user == null || user.Identity?.IsAuthenticated != true)
+                throw new UnauthorizedAccessException("Usuário não autenticado.");
 
-            return int.Parse(usuarioIdClaim);
+         
+            var userIdStr =
+                user.FindFirst("sub")?.Value
+                ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdStr) || !int.TryParse(userIdStr, out var userId))
+                throw new UnauthorizedAccessException("Id do usuário inválido no token.");
+
+            return userId;
         }
     }
 }

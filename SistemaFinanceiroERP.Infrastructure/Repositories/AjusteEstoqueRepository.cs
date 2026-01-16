@@ -19,7 +19,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
 
         public async Task<IEnumerable<AjusteEstoque>> GetAllAsync()
         {
-            return await _context.AjusteEstoque
+            return await _context.AjustesEstoque
             .Include(m => m.Produto)
             .Include(m => m.LocalEstoque)
             .Include(m => m.Usuario)
@@ -28,7 +28,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
 
         public async Task<AjusteEstoque?> GetByIdAsync(int id)
         {
-            return await _context.AjusteEstoque
+            return await _context.AjustesEstoque
                 .Include(m => m.Produto)
                 .Include(m => m.LocalEstoque)
                 .Include(m => m.Usuario)
@@ -38,7 +38,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
 
         public async Task<IEnumerable<AjusteEstoque>> GetByProdutoIdAsync(int produtoId)
         {
-            return await _context.AjusteEstoque
+            return await _context.AjustesEstoque
                 .Include(m => m.Produto)
                 .Include(m => m.LocalEstoque)
                 .Include(m => m.Usuario)
@@ -48,7 +48,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
 
         public async Task<IEnumerable<AjusteEstoque>> GetByLocalEstoqueIdAsync(int localEstoqueId)
         {
-            return await _context.AjusteEstoque
+            return await _context.AjustesEstoque
                 .Include(m => m.Produto)
                 .Include(m => m.LocalEstoque)
                 .Include(m => m.Usuario)
@@ -99,10 +99,10 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
                 ajusteEstoque.DataCriacao = DateTime.UtcNow;
                 ajusteEstoque.DataAtualizacao = DateTime.UtcNow;
                 ajusteEstoque.DataDoAjuste = DateTime.UtcNow;
-                await _context.AjusteEstoque.AddAsync(ajusteEstoque);
+                await _context.AjustesEstoque.AddAsync(ajusteEstoque);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return await _context.AjusteEstoque
+                return await _context.AjustesEstoque 
                      .Include(a => a.Produto)
                      .Include(a => a.LocalEstoque)
                      .Include(a => a.Usuario)
