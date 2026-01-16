@@ -9,6 +9,7 @@ namespace SistemaFinanceiroERP.Application.DTOs.AjusteEstoque
         public int LocalEstoqueId { get; set; }
         public string LocalEstoqueNome { get; set; } = string.Empty;
         public string UsuarioNome { get; set; } = string.Empty;
+        public int UsuarioId { get; set; }
         public DateTime DataCriacao { get; set; }
         public DateTime? DataAtualizacao { get; set; }
         public bool Ativo { get; set; }

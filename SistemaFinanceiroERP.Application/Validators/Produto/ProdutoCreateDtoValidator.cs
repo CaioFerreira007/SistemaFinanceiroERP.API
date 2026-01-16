@@ -2,7 +2,7 @@
 using SistemaFinanceiroERP.Application.DTOs.Produto;
 namespace SistemaFinanceiroERP.Application.Validators.Produto
 {
-    public class ProdutoCreateDtoValidator:AbstractValidator<ProdutoCreateDto>
+    public class ProdutoCreateDtoValidator : AbstractValidator<ProdutoCreateDto>
     {
 
         public ProdutoCreateDtoValidator()
@@ -25,7 +25,7 @@ namespace SistemaFinanceiroERP.Application.Validators.Produto
                 .NotEmpty().WithMessage("O código de barras é obrigatório.")
                 .MaximumLength(50).WithMessage("O código de barras não pode exceder 50 caracteres.");
 
-           
+
 
             RuleFor(x => x.UnidadeMedida)
                 .NotEmpty().WithMessage("A unidade de medida é obrigatória.")

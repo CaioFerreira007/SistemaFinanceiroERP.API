@@ -110,7 +110,6 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
                     }
                 }
 
-           
                 switch (movimentacao.TipoMovimentacao)
                 {
                     case TipoMovimentacao.Entrada:
@@ -122,10 +121,18 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
                         break;
 
                     case TipoMovimentacao.Ajuste:
-                        throw new NotImplementedException("Ajuste ainda não implementado (Fase 2.3)");
+                        throw new InvalidOperationException(
+                            "Use o endpoint /ajusteestoque para registrar ajustes de inventário. " +
+                            "Este método é apenas para movimentações normais (Entrada/Saida).");
 
                     case TipoMovimentacao.Transferencia:
-                        throw new NotImplementedException("Transferência ainda não implementada (Fase 2.3)");
+                        throw new NotImplementedException(
+                            "Transferências entre locais ainda não foram implementadas. " +
+                            "Use Saida no local de origem e Entrada no local de destino.");
+
+                    default:
+                        throw new ArgumentException($"Tipo de movimentação inválido: " +
+                            $"{movimentacao.TipoMovimentacao}");
                 }
 
                 produtoLocal.DataAtualizacao = DateTime.UtcNow;

@@ -9,6 +9,7 @@ namespace SistemaFinanceiroERP.Application.DTOs.MovimentacaoEstoque
         public string NomeProduto { get; set; } = string.Empty;
         public string NomeLocalEstoque { get; set; } = string.Empty;
         public string NomeUsuario { get; set; } = string.Empty;
+        public int UsuarioId { get; set; }
         public string TipoMovimentacao { get; set; } = string.Empty;
         public decimal Quantidade { get; set; }
         public string? Observacao { get; set; }

@@ -39,7 +39,6 @@ namespace SistemaFinanceiroERP.API.Controllers
             }
             var ajusteEstoqueNovo = _mapper.Map<AjusteEstoque>(dto);
             ajusteEstoqueNovo.EmpresaId = _tenantProvider.GetEmpresaId();
-            ajusteEstoqueNovo.DataDoAjuste = DateTime.UtcNow;
 
             var usuarioClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(usuarioClaim))

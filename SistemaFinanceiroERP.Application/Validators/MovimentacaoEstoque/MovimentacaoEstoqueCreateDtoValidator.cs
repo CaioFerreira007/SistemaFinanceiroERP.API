@@ -18,7 +18,8 @@ namespace SistemaFinanceiroERP.Application.Validators.MovimentacaoEstoque
                 .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("A data da movimentação não pode ser no futuro.");
             RuleFor(x => x.Observacao)
                 .MaximumLength(500).WithMessage("A observação não pode exceder 500 caracteres.");
-
+            RuleFor(x => x.Quantidade)
+    .GreaterThan(0).WithMessage("A quantidade deve ser maior que zero");
         }
     }
 }

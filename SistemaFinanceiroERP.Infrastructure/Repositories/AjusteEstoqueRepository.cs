@@ -98,6 +98,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
                 produto.DataAtualizacao = DateTime.UtcNow;
                 ajusteEstoque.DataCriacao = DateTime.UtcNow;
                 ajusteEstoque.DataAtualizacao = DateTime.UtcNow;
+                ajusteEstoque.DataDoAjuste = DateTime.UtcNow;
                 await _context.AjusteEstoque.AddAsync(ajusteEstoque);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

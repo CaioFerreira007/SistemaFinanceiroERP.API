@@ -32,7 +32,7 @@ namespace SistemaFinanceiroERP.Domain.Entities
 
         public decimal EstoqueMinimo { get; set; }
         public int? LocalEstoqueId { get; set; }
-
+        public LocalEstoque? LocalEstoque { get; set; }
 
 
     }

@@ -16,9 +16,9 @@ namespace SistemaFinanceiroERP.Application.Profiles
 
             // Response
             CreateMap<Produto, ProdutoResponseDto>().ForMember(dest => dest.QuantidadeEstoque,
-                opt => opt.MapFrom(src => src.QuantidadeEstoqueTotal))
-            .ForMember(dest => dest.LocalEstoqueNome,
-                opt => opt.Ignore());
+        opt => opt.MapFrom(src => src.QuantidadeEstoqueTotal))
+    .ForMember(dest => dest.LocalEstoqueNome,
+        opt => opt.MapFrom(src => src.LocalEstoque != null ? src.LocalEstoque.LocalNome : null));
         }
     }
 }

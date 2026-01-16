@@ -12,6 +12,5 @@ namespace SistemaFinanceiroERP.Application.DTOs.AjusteEstoque
         public int LocalEstoqueId { get; set; }
         public decimal QuantidadeNova { get; set; }
         public string Observacao { get; set; } = string.Empty;
-        public DateTime DataDoAjuste { get; set; }
     }
 }
