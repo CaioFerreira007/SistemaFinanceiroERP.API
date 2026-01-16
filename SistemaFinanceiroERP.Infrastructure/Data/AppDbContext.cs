@@ -36,13 +36,10 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // ================================
-            // RELACIONAMENTOS (multi-local)
-            // ================================
             modelBuilder.Entity<ProdutoLocalEstoque>()
-                .HasOne(pl => pl.Produto)
-                .WithMany(p => p.ProdutosLocaisEstoque)
-                .HasForeignKey(pl => pl.ProdutoId);
+          .HasOne(pl => pl.Produto)
+          .WithMany(p => p.ProdutosLocaisEstoque)
+          .HasForeignKey(pl => pl.ProdutoId);
 
             modelBuilder.Entity<ProdutoLocalEstoque>()
                 .HasOne(pl => pl.LocalEstoque)
@@ -59,10 +56,16 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(l => l.EmpresaId);
 
-          
+            modelBuilder.Entity<Produto>()
+                .HasOne(p => p.LocalEstoque)
+                .WithMany()
+                .HasForeignKey(p => p.LocalEstoqueId)
+                .OnDelete(DeleteBehavior.SetNull) 
+                .IsRequired(false);
+
 
             modelBuilder.Entity<Produto>()
-                .HasQueryFilter(p => (CurrentEmpresaId == 0 || p.EmpresaId == CurrentEmpresaId) && p.Ativo);
+         .HasQueryFilter(p => (CurrentEmpresaId == 0 || p.EmpresaId == CurrentEmpresaId) && p.Ativo);
 
             modelBuilder.Entity<Usuario>()
                 .HasQueryFilter(u => (CurrentEmpresaId == 0 || u.EmpresaId == CurrentEmpresaId) && u.Ativo);
@@ -82,7 +85,6 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
             modelBuilder.Entity<AjusteEstoque>()
                 .HasQueryFilter(a => (CurrentEmpresaId == 0 || a.EmpresaId == CurrentEmpresaId) && a.Ativo);
         }
-
 
         public override int SaveChanges()
         {
