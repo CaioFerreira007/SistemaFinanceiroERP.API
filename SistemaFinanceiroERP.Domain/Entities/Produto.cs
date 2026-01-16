@@ -30,6 +30,10 @@ namespace SistemaFinanceiroERP.Domain.Entities
 
             public Empresa? Empresa { get; set; }
 
+        public decimal EstoqueMinimo { get; set; }
+        public int? LocalEstoqueId { get; set; }
 
-        }
+
+
+    }
     }

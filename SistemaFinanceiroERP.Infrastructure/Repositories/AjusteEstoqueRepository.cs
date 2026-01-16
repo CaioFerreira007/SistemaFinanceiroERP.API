@@ -10,9 +10,9 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
         private readonly ITenantProvider _tenantProvider;
-        
-        public AjusteEstoqueRepository(AppDbContext context,ITenantProvider tenantProvider)
-        { 
+
+        public AjusteEstoqueRepository(AppDbContext context, ITenantProvider tenantProvider)
+        {
             _context = context;
             _tenantProvider = tenantProvider;
         }
@@ -63,7 +63,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
             {
                 var produto = await _context.Produtos.
                     SingleOrDefaultAsync(p => p.Id == ajusteEstoque.ProdutoId);
-                    if(produto == null)
+                if (produto == null)
                 {
                     throw new Exception("Produto não encontrado");
                 }
@@ -96,10 +96,16 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
                 produtoLocal.QuantidadeNoLocal = ajusteEstoque.QuantidadeNova;
                 produtoLocal.DataAtualizacao = DateTime.UtcNow;
                 produto.DataAtualizacao = DateTime.UtcNow;
+                ajusteEstoque.DataCriacao = DateTime.UtcNow;
+                ajusteEstoque.DataAtualizacao = DateTime.UtcNow;
                 await _context.AjusteEstoque.AddAsync(ajusteEstoque);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return ajusteEstoque;
+                return await _context.AjusteEstoque
+                     .Include(a => a.Produto)
+                     .Include(a => a.LocalEstoque)
+                     .Include(a => a.Usuario)
+                     .FirstAsync(a => a.Id == ajusteEstoque.Id);
 
             }
             catch

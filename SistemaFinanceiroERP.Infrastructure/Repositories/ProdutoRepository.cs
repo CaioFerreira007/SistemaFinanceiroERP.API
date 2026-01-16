@@ -1,5 +1,6 @@
-﻿using SistemaFinanceiroERP.Domain.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
 using SistemaFinanceiroERP.Domain.Entities;
+using SistemaFinanceiroERP.Domain.Interfaces;
 using SistemaFinanceiroERP.Infrastructure.Data;
 
 namespace SistemaFinanceiroERP.Infrastructure.Repositories
@@ -9,5 +10,6 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
         public ProdutoRepository(AppDbContext context) : base(context)
         {
         }
+       
     }
 }

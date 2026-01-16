@@ -30,7 +30,12 @@ namespace SistemaFinanceiroERP.Application.Validators.Produto
             RuleFor(x => x.UnidadeMedida)
                 .NotEmpty().WithMessage("A unidade de medida é obrigatória.")
                 .MaximumLength(20).WithMessage("A unidade de medida não pode exceder 20 caracteres.");
+            RuleFor(x => x.EstoqueMinimo)
+           .GreaterThanOrEqualTo(0).WithMessage("Estoque mínimo não pode ser negativo");
 
+            RuleFor(x => x.LocalEstoqueId)
+                .GreaterThan(0).When(x => x.LocalEstoqueId.HasValue)
+                .WithMessage("LocalEstoqueId deve ser maior que zero quando informado");
         }
 
     }
