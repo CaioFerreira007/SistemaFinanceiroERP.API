@@ -2,16 +2,10 @@
 
 namespace SistemaFinanceiroERP.Domain.Interfaces
 {
-    public interface IProdutoRepository
+    public interface IProdutoRepository : IRepository<Produto>
     {
-        Task AddAsync(Produto produto);
-        Task UpdateAsync(Produto produto);
-
-        Task<IEnumerable<Produto>> GetAllAsync();
-        Task<Produto?> GetByIdAsync(int id);
-
-        Task<bool> HasMovimentacoesAsync(int produtoId);
-
-        Task SaveChangesAsync();
+        Task<IEnumerable<Produto>> GetProdutosEstoqueBaixoAsync();
+        Task<IEnumerable<MovimentacaoEstoque>> GetMovimentacoesPorProdutoAsync(int produtoId);
+        Task<bool> PossuiMovimentacoesAsync(int produtoId);
     }
 }

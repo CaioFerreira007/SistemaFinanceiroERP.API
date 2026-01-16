@@ -8,17 +8,20 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
     {
         private readonly ITenantProvider? _tenantProvider;
 
+        public int CurrentEmpresaId { get; private set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options, ITenantProvider tenantProvider)
             : base(options)
         {
             _tenantProvider = tenantProvider;
+            CurrentEmpresaId = TryGetEmpresaIdOrZero();
         }
 
-        // Design-time / migrations
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
             _tenantProvider = null;
+            CurrentEmpresaId = 0;
         }
 
         public DbSet<Empresa> Empresas { get; set; }
@@ -27,15 +30,15 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
         public DbSet<LocalEstoque> LocaisEstoque { get; set; }
         public DbSet<ProdutoLocalEstoque> ProdutosLocaisEstoque { get; set; }
         public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
-        public DbSet<AjusteEstoque> AjustesEstoque { get; set; }
+        public DbSet<AjusteEstoque> AjusteEstoque { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // =========================
-            // RELACIONAMENTOS
-            // =========================
+            // ================================
+            // RELACIONAMENTOS (multi-local)
+            // ================================
             modelBuilder.Entity<ProdutoLocalEstoque>()
                 .HasOne(pl => pl.Produto)
                 .WithMany(p => p.ProdutosLocaisEstoque)
@@ -56,68 +59,44 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(l => l.EmpresaId);
 
-            // =========================
-            // ✅ FAIL-SAFE TENANT ID
-            // Se não tem usuário/token (login/register), empresaId = 0
-            // Assim NÃO EXPLODE o model building.
-            // =========================
-            var empresaId = GetEmpresaIdSafe();
+          
 
-            // =========================
-            // QUERY FILTERS (Multi-tenant + Soft Delete)
-            // =========================
             modelBuilder.Entity<Produto>()
-                .HasQueryFilter(p => p.EmpresaId == empresaId && p.Ativo);
+                .HasQueryFilter(p => (CurrentEmpresaId == 0 || p.EmpresaId == CurrentEmpresaId) && p.Ativo);
 
             modelBuilder.Entity<Usuario>()
-                .HasQueryFilter(u => u.EmpresaId == empresaId && u.Ativo);
+                .HasQueryFilter(u => (CurrentEmpresaId == 0 || u.EmpresaId == CurrentEmpresaId) && u.Ativo);
 
             modelBuilder.Entity<Empresa>()
-                .HasQueryFilter(e => e.Id == empresaId && e.Ativo);
+                .HasQueryFilter(e => (CurrentEmpresaId == 0 || e.Id == CurrentEmpresaId) && e.Ativo);
 
             modelBuilder.Entity<LocalEstoque>()
-                .HasQueryFilter(l => l.EmpresaId == empresaId && l.Ativo);
+                .HasQueryFilter(l => (CurrentEmpresaId == 0 || l.EmpresaId == CurrentEmpresaId) && l.Ativo);
 
             modelBuilder.Entity<ProdutoLocalEstoque>()
-                .HasQueryFilter(pl => pl.EmpresaId == empresaId && pl.Ativo);
+                .HasQueryFilter(pl => (CurrentEmpresaId == 0 || pl.EmpresaId == CurrentEmpresaId) && pl.Ativo);
 
             modelBuilder.Entity<MovimentacaoEstoque>()
-                .HasQueryFilter(m => m.EmpresaId == empresaId && m.Ativo);
+                .HasQueryFilter(m => (CurrentEmpresaId == 0 || m.EmpresaId == CurrentEmpresaId) && m.Ativo);
 
             modelBuilder.Entity<AjusteEstoque>()
-                .HasQueryFilter(a => a.EmpresaId == empresaId && a.Ativo);
+                .HasQueryFilter(a => (CurrentEmpresaId == 0 || a.EmpresaId == CurrentEmpresaId) && a.Ativo);
         }
 
-        private int GetEmpresaIdSafe()
-        {
-            try
-            {
-                if (_tenantProvider == null) return 0;
-                return _tenantProvider.GetEmpresaId();
-            }
-            catch
-            {
-                // Sem token / sem usuário autenticado
-                return 0;
-            }
-        }
 
-        // =========================
-        // AUDITORIA CENTRALIZADA UTC
-        // =========================
         public override int SaveChanges()
         {
-            ApplyAudit();
+            ApplyAuditUtc();
             return base.SaveChanges();
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            ApplyAudit();
+            ApplyAuditUtc();
             return base.SaveChangesAsync(cancellationToken);
         }
 
-        private void ApplyAudit()
+        private void ApplyAuditUtc()
         {
             var now = DateTime.UtcNow;
 
@@ -127,12 +106,26 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
                 {
                     entry.Entity.DataCriacao = now;
                     entry.Entity.DataAtualizacao = now;
+                    entry.Entity.Ativo = true;
                 }
-                else if (entry.State == EntityState.Modified)
+
+                if (entry.State == EntityState.Modified)
                 {
-                    entry.Property(e => e.DataCriacao).IsModified = false;
                     entry.Entity.DataAtualizacao = now;
                 }
+            }
+        }
+
+
+        private int TryGetEmpresaIdOrZero()
+        {
+            try
+            {
+                return _tenantProvider?.GetEmpresaId() ?? 0;
+            }
+            catch
+            {
+                return 0;
             }
         }
     }

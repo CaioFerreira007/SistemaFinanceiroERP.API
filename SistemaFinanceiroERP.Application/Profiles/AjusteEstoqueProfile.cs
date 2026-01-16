@@ -12,7 +12,7 @@ namespace SistemaFinanceiroERP.Application.Profiles
                 .ForMember(dest => dest.ProdutoNome,
                 otp => otp.MapFrom(src => src.Produto.ProdutoNome))
                 .ForMember(dest => dest.LocalEstoqueNome,
-                otp => otp.MapFrom(src => src.LocalEstoque.LocalNome))
+                otp => otp.MapFrom(src => src.LocalEstoque.LocalNome)) 
                 .ForMember(dest => dest.UsuarioNome,
                 otp => otp.MapFrom(src => src.Usuario.UsuarioNome))
                 .ForMember(dest => dest.Diferenca,

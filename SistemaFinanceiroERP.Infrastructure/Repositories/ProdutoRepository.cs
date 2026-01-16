@@ -5,54 +5,54 @@ using SistemaFinanceiroERP.Infrastructure.Data;
 
 namespace SistemaFinanceiroERP.Infrastructure.Repositories
 {
-    public class ProdutoRepository : IProdutoRepository
+    public class ProdutoRepository : Repository<Produto>, IProdutoRepository
     {
-        private readonly AppDbContext _context;
-        private readonly ITenantProvider _tenantProvider;
+        
 
-        public ProdutoRepository(AppDbContext context, ITenantProvider tenantProvider)
+        public ProdutoRepository(AppDbContext context) : base(context)
         {
-            _context = context;
-            _tenantProvider = tenantProvider;
         }
 
-        public async Task AddAsync(Produto produto)
+        public new async Task<IEnumerable<Produto>> GetAllAsync()
         {
-            _context.Produtos.Add(produto);
-            await Task.CompletedTask;
-        }
-
-        public async Task UpdateAsync(Produto produto)
-        {
-            _context.Produtos.Update(produto);
-            await Task.CompletedTask;
-        }
-
-        public async Task<IEnumerable<Produto>> GetAllAsync()
-        {
-            return await _context.Produtos
+            return await _context.Set<Produto>()
+                .Include(p => p.LocalEstoque) 
                 .AsNoTracking()
                 .ToListAsync();
         }
 
-        public async Task<Produto?> GetByIdAsync(int id)
+        public new async Task<Produto?> GetByIdAsync(int id)
         {
-            return await _context.Produtos
+            return await _context.Set<Produto>()
+                .Include(p => p.LocalEstoque) 
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<bool> HasMovimentacoesAsync(int produtoId)
+        public async Task<IEnumerable<Produto>> GetProdutosEstoqueBaixoAsync()
         {
-            var empresaId = _tenantProvider.GetEmpresaId();
+            var produtos = await _context.Set<Produto>()
+                .Include(p => p.ProdutosLocaisEstoque)
+                .Include(p => p.LocalEstoque)  
+                .AsNoTracking()
+                .ToListAsync();
 
-            return await _context.MovimentacoesEstoque
-                .IgnoreQueryFilters()
-                .AnyAsync(m => m.EmpresaId == empresaId && m.ProdutoId == produtoId);
+            return produtos
+                .Where(p => p.EstoqueMinimo > 0 && p.QuantidadeEstoqueTotal < p.EstoqueMinimo)
+                .ToList();
         }
 
-        public async Task SaveChangesAsync()
+        public async Task<IEnumerable<MovimentacaoEstoque>> GetMovimentacoesPorProdutoAsync(int produtoId)
         {
-            await _context.SaveChangesAsync();
+            return await _context.Set<MovimentacaoEstoque>()
+                .Where(m => m.ProdutoId == produtoId)
+                .OrderByDescending(m => m.DataCriacao)
+                .ToListAsync();
+        }
+
+        public async Task<bool> PossuiMovimentacoesAsync(int produtoId)
+        {
+            return await _context.Set<MovimentacaoEstoque>()
+                .AnyAsync(m => m.ProdutoId == produtoId);
         }
     }
 }

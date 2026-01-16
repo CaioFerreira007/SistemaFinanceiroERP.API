@@ -16,9 +16,13 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
             _tenantProvider = tenantProvider;
         }
 
+        
         public async Task<IEnumerable<MovimentacaoEstoque>> GetAllAsync()
         {
             return await _context.MovimentacoesEstoque
+                .Include(m => m.Produto)        
+                .Include(m => m.LocalEstoque)   
+                .Include(m => m.Usuario)        
                 .AsNoTracking()
                 .OrderByDescending(m => m.DataCriacao)
                 .ToListAsync();
@@ -27,13 +31,20 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
         public async Task<MovimentacaoEstoque?> GetByIdAsync(int id)
         {
             return await _context.MovimentacoesEstoque
+                .Include(m => m.Produto)        
+                .Include(m => m.LocalEstoque)   
+                .Include(m => m.Usuario)        
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
+        
         public async Task<IEnumerable<MovimentacaoEstoque>> GetByProdutoAsync(int produtoId)
         {
             return await _context.MovimentacoesEstoque
+                .Include(m => m.Produto)        
+                .Include(m => m.LocalEstoque)   
+                .Include(m => m.Usuario)        
                 .AsNoTracking()
                 .Where(m => m.ProdutoId == produtoId)
                 .OrderByDescending(m => m.DataCriacao)
@@ -43,6 +54,9 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
         public async Task<IEnumerable<MovimentacaoEstoque>> GetByLocalEstoqueAsync(int localEstoqueId)
         {
             return await _context.MovimentacoesEstoque
+                .Include(m => m.Produto)       
+                .Include(m => m.LocalEstoque)   
+                .Include(m => m.Usuario)        
                 .AsNoTracking()
                 .Where(m => m.LocalEstoqueId == localEstoqueId)
                 .OrderByDescending(m => m.DataCriacao)

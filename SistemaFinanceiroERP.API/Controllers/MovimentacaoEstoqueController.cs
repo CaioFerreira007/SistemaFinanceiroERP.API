@@ -72,18 +72,20 @@ namespace SistemaFinanceiroERP.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("produto/{id:int}")]
-        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByProduto(int id)
+     
+        [HttpGet("produto/{produtoId:int}")]  
+        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByProduto(int produtoId)  // ✅ CORRIGIDO
         {
-            var movs = await _repository.GetByProdutoAsync(id);
+            var movs = await _repository.GetByProdutoAsync(produtoId); 
             var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movs);
             return Ok(response);
         }
 
-        [HttpGet("local/{id:int}")]
-        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByLocalEstoque(int id)
+      
+        [HttpGet("local/{localEstoqueId:int}")]  
+        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByLocalEstoque(int localEstoqueId)  // ✅ CORRIGIDO
         {
-            var movs = await _repository.GetByLocalEstoqueAsync(id);
+            var movs = await _repository.GetByLocalEstoqueAsync(localEstoqueId); 
             var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movs);
             return Ok(response);
         }

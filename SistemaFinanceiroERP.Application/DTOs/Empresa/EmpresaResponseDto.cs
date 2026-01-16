@@ -10,7 +10,8 @@ namespace SistemaFinanceiroERP.Application.DTOs.Empresa
         public string Cnpj { get; set; } = string.Empty;
         public string Telefone { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public TipoEmpresa Tipo { get; set; }
+        public string TipoEmpresa { get; set; } = string.Empty;
+
         public DateTime DataCriacao { get; set; }
         public DateTime? DataAtualizacao { get; set; }
         public bool Ativo { get; set; }
