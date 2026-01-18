@@ -15,7 +15,5 @@
         public DateTime? DataAtualizacao { get; set; }
         public bool Ativo { get; set; }
         public decimal EstoqueMinimo { get; set; }
-        public int? LocalEstoqueId { get; set; }
-        public string? LocalEstoqueNome { get; set; }
     }
 }

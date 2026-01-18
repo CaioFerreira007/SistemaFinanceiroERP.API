@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 using SistemaFinanceiroERP.Application.DTOs.Produto;
+
 namespace SistemaFinanceiroERP.Application.Validators.Produto
 {
     public class ProdutoCreateDtoValidator : AbstractValidator<ProdutoCreateDto>
     {
-
         public ProdutoCreateDtoValidator()
         {
             RuleFor(x => x.ProdutoNome)
@@ -25,18 +25,12 @@ namespace SistemaFinanceiroERP.Application.Validators.Produto
                 .NotEmpty().WithMessage("O código de barras é obrigatório.")
                 .MaximumLength(50).WithMessage("O código de barras não pode exceder 50 caracteres.");
 
-
-
             RuleFor(x => x.UnidadeMedida)
                 .NotEmpty().WithMessage("A unidade de medida é obrigatória.")
                 .MaximumLength(20).WithMessage("A unidade de medida não pode exceder 20 caracteres.");
+
             RuleFor(x => x.EstoqueMinimo)
-           .GreaterThanOrEqualTo(0).WithMessage("Estoque mínimo não pode ser negativo");
-
-            RuleFor(x => x.LocalEstoqueId)
-                .GreaterThan(0).When(x => x.LocalEstoqueId.HasValue)
-                .WithMessage("LocalEstoqueId deve ser maior que zero quando informado");
+                .GreaterThanOrEqualTo(0).WithMessage("Estoque mínimo não pode ser negativo");
         }
-
     }
 }

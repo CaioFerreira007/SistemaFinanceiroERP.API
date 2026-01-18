@@ -10,7 +10,5 @@
         public string CodigoBarras { get; set; } = string.Empty;
         public string UnidadeMedida { get; set; } = string.Empty;
         public decimal EstoqueMinimo { get; set; }
-        public int? LocalEstoqueId { get; set; }
-
     }
 }
