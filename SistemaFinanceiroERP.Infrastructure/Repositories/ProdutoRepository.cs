@@ -16,7 +16,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
         public new async Task<IEnumerable<Produto>> GetAllAsync()
         {
             return await _context.Set<Produto>()
-                .Include(p => p.LocalEstoque) 
+                .Include(p => p.ProdutosLocaisEstoque) 
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -24,7 +24,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
         public new async Task<Produto?> GetByIdAsync(int id)
         {
             return await _context.Set<Produto>()
-                .Include(p => p.LocalEstoque) 
+                .Include(p => p.ProdutosLocaisEstoque) 
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -32,7 +32,7 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
         {
             var produtos = await _context.Set<Produto>()
                 .Include(p => p.ProdutosLocaisEstoque)
-                .Include(p => p.LocalEstoque)  
+                .Include(p => p.ProdutosLocaisEstoque)  
                 .AsNoTracking()
                 .ToListAsync();
 

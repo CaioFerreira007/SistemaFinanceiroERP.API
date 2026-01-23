@@ -31,6 +31,8 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
         public DbSet<ProdutoLocalEstoque> ProdutosLocaisEstoque { get; set; }
         public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
         public DbSet<AjusteEstoque> AjusteEstoque { get; set; }
+        public DbSet<Transacao> Transacoes { get; set; }
+        public DbSet<ItemTransacao> ItensTransacao { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,6 +58,33 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(l => l.EmpresaId);
 
+            modelBuilder.Entity<Transacao>()
+            .HasOne(t => t.EmpresaVendedora)
+            .WithMany()
+            .HasForeignKey(t => t.EmpresaVendedoraId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Transacao>()
+                .HasOne(t => t.EmpresaCompradora)
+                .WithMany()
+                .HasForeignKey(t => t.EmpresaCompradoraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Transacao>()
+                .HasOne(t => t.Usuario)
+                .WithMany()
+                .HasForeignKey(t => t.UsuarioId);
+
+            modelBuilder.Entity<ItemTransacao>()
+            .HasOne(it => it.Transacao)
+            .WithMany(t => t.ItemsTransacao)
+            .HasForeignKey(it => it.TransacaoId);
+
+            modelBuilder.Entity<ItemTransacao>()
+                .HasOne(it => it.Produto)
+                .WithMany()
+                .HasForeignKey(it => it.ProdutoId);
+
             modelBuilder.Entity<Produto>()
                 .HasQueryFilter(p => (CurrentEmpresaId == 0 || p.EmpresaId == CurrentEmpresaId) && p.Ativo);
 
@@ -76,6 +105,11 @@ namespace SistemaFinanceiroERP.Infrastructure.Data
 
             modelBuilder.Entity<AjusteEstoque>()
                 .HasQueryFilter(a => (CurrentEmpresaId == 0 || a.EmpresaId == CurrentEmpresaId) && a.Ativo);
+
+            modelBuilder.Entity<Transacao>()
+                .HasQueryFilter(t => (CurrentEmpresaId == 0 || t.EmpresaCompradoraId == CurrentEmpresaId || t.EmpresaVendedoraId == CurrentEmpresaId) && t.Ativo);
+            modelBuilder.Entity<ItemTransacao>()
+                .HasQueryFilter(it => (CurrentEmpresaId == 0 || it.Transacao.EmpresaCompradoraId == CurrentEmpresaId || it.Transacao.EmpresaVendedoraId == CurrentEmpresaId) && it.Ativo);
         }
 
         public override int SaveChanges()

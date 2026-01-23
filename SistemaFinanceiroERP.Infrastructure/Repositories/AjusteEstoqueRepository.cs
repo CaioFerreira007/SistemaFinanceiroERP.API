@@ -77,7 +77,6 @@ namespace SistemaFinanceiroERP.Infrastructure.Repositories
             var diferenca = quantidadeNova - quantidadeAnterior;
 
             ajuste.QuantidadeAnterior = quantidadeAnterior;
-            ajuste.Diferenca = diferenca;
             ajuste.DataCriacao = DateTime.UtcNow;
             ajuste.Ativo = true;
 
