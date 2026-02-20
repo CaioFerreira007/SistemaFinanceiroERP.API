@@ -1,4 +1,4 @@
-using FluentValidation;
+ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -33,6 +33,7 @@ builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
 builder.Services.AddScoped<ILocalEstoqueRepository, LocalEstoqueRepository>();
 builder.Services.AddScoped<IMovimentacaoEstoqueRepository, MovimentacaoEstoqueRepository>();
 builder.Services.AddScoped<IAjusteEstoqueRepository, AjusteEstoqueRepository>();    
+builder.Services.AddScoped<ITransacaoRepository, TransacaoRepository>();
 // Add services to the container.
 
 builder.Services.AddControllers()
