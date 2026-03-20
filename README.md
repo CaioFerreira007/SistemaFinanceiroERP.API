@@ -1,197 +1,203 @@
-markdown# Sistema ERP Multi-Tenant
+🏢 Sistema ERP/Marketplace B2B Multi-Tenant
+Um sistema de gerenciamento empresarial (ERP) completo desenvolvido com ASP.NET Core 8, C# 12 e MySQL, seguindo Clean Architecture e padrões profissionais de desenvolvimento.
+📋 Visão Geral
+Este projeto implementa uma plataforma B2B onde empresas cadastradas podem realizar transações comerciais entre si. Diferente de um ERP tradicional com cadastros separados de "clientes" e "fornecedores", aqui toda entidade é uma empresa que pode atuar como compradora, vendedora ou ambas.
+Stack Tecnológico:
 
-Sistema ERP completo desenvolvido com ASP.NET Core 8 e Clean Architecture, focado em gestão empresarial com isolamento total entre empresas (multi-tenancy).
+Backend: ASP.NET Core 8.0
+Linguagem: C# 12
+Banco de Dados: MySQL
+ORM: Entity Framework Core
+Arquitetura: Clean Architecture (4 camadas)
+Autenticação: JWT Bearer
+Documentação: Swagger/OpenAPI
 
-## Sobre o Projeto
+🎯 Funcionalidades Implementadas
+✅ Fase 1: Fundação
 
-ERP (Enterprise Resource Planning) profissional com arquitetura limpa, autenticação JWT, multi-tenancy robusto e padrões de desenvolvimento modernos. O sistema permite gestão completa de vendas, compras, estoque e finanças com total isolamento de dados entre empresas.
+ Autenticação e autorização com JWT
+ Sistema multi-tenant com isolamento de dados
+ Gestão de empresas e usuários
+ Controle de acesso baseado em papéis
 
-## Status do Projeto
+✅ Fase 2: Estoque
 
-**Em Desenvolvimento** - Fase 1 concluída (96%)
+ Cadastro de produtos
+ Múltiplos locais de armazenamento
+ Movimentações de estoque (entrada/saída)
+ Ajustes de inventário
+ Consulta de estoque baixo
+ Histórico completo de movimentações
 
-**Tempo investido:** ~36 horas  
-**Progresso:** 14.6% do projeto total (247h estimadas)
+✅ Fase 3.1: Transações B2B
 
-SEÇÃO 2: Tecnologias
-markdown## Stack Tecnológica
+ Entidades de Transação e ItemTransacao
+ Transações entre duas empresas diferentes
+ Query Filters especializados para B2B
+ Endpoints para criar e consultar transações
+ Endpoints de leitura para itens de transação
+ Validações de negócio (empresa não transaciona consigo mesma)
+ Geração automática de número único (TRN-YYYY-000001)
 
-**Backend:**
-- ASP.NET Core 8.0
-- C# 12
-- Entity Framework Core 8.0
-- MySQL
-
-**Arquitetura e Padrões:**
-- Clean Architecture (4 camadas)
-- Repository Pattern
-- Dependency Injection
-- CQRS (planejado)
-
-**Segurança:**
-- JWT (JSON Web Tokens)
-- BCrypt (hash de senhas)
-- Multi-tenancy com Query Filters
-
-**Validação e Mapeamento:**
-- FluentValidation
-- AutoMapper
-
-**Documentação:**
-- Swagger / OpenAPI
-
-SEÇÃO 3: Arquitetura
-markdown## Arquitetura do Projeto
-
-O projeto segue Clean Architecture com 4 camadas bem definidas:
-```
+📊 Arquitetura
+O projeto segue Clean Architecture em 4 camadas:
 SistemaFinanceiroERP/
-├── Domain/              # Entidades e regras de negócio
-│   └── Entities/        # Classes de domínio (Produto, Usuario, Empresa)
+├── Domain/                  # Entidades, Interfaces, Enums
+│   ├── Entities/           # TransacaoEntity, ItemTransacao, Empresa, Produto, etc.
+│   ├── Enums/              # StatusTransacao, TipoEmpresa
+│   └── Interfaces/         # ITransacaoRepository, IItemTransacaoRepository, etc.
 │
-├── Application/         # Lógica de aplicação e interfaces
-│   └── Interfaces/      # Contratos (IRepository, ITenantProvider)
+├── Application/            # DTOs, Validators, AutoMapper Profiles
+│   ├── DTOs/              # TransacaoCreateDto, TransacaoResponseDto
+│   ├── Validators/        # TransacaoCreateValidator, ItemTransacaoValidator
+│   └── Profiles/          # TransacaoProfile, ItemTransacaoProfile
 │
-├── Infrastructure/      # Implementações de infraestrutura
-│   ├── Data/           # DbContext, Migrations
-│   ├── Repositories/   # Implementação dos repositories
-│   └── Security/       # JWT, Hashing, TenantProvider
+├── Infrastructure/         # Implementações, Banco de Dados
+│   ├── Data/              # AppDbContext, AppDbContextFactory
+│   ├── Repositories/      # TransacaoRepository, ItemTransacaoRepository
+│   └── Security/          # PasswordHasher, TokenService, TenantProvider
 │
-└── API/                # Camada de apresentação
-    ├── Controllers/    # Endpoints REST
-    ├── DTOs/          # Data Transfer Objects
-    └── Validators/    # Validadores FluentValidation
-```
+└── API/                    # Controllers, Endpoints
+    └── Controllers/       # TransacaoController, ItemTransacaoController
+🔌 Endpoints Principais
+Autenticação
+POST   /api/Auth/login              # Login e obter token JWT
+POST   /api/Auth/register           # Registrar novo usuário
+Empresas
+GET    /api/Empresa                 # Listar minhas empresas
+POST   /api/Empresa                 # Criar empresa
+GET    /api/Empresa/{id}            # Buscar empresa por ID
+Produtos
+GET    /api/Produto                 # Listar produtos
+POST   /api/Produto                 # Criar produto
+GET    /api/Produto/{id}            # Buscar produto
+PUT    /api/Produto/{id}            # Atualizar produto
+Estoque
+GET    /api/LocalEstoque            # Listar locais
+POST   /api/MovimentacaoEstoque     # Registrar movimentação
+GET    /api/AjusteEstoque           # Consultar ajustes
+Transações B2B
+POST   /api/Transacao                              # Criar transação
+GET    /api/Transacao                              # Listar todas
+GET    /api/Transacao/{id}                         # Buscar por ID
+GET    /api/Transacao/{id}/itens                   # Buscar com itens
+GET    /api/Transacao/como-vendedor                # Minhas vendas
+GET    /api/Transacao/como-comprador               # Minhas compras
+PUT    /api/Transacao/{id}/status                  # Atualizar status
+Itens de Transação
+GET    /api/ItemTransacao/{id}                     # Buscar item
+GET    /api/ItemTransacao/transacao/{transacaoId}  # Itens da transação
+GET    /api/ItemTransacao/produto/{produtoId}     # Itens com produto
+🚀 Como Rodar Localmente
+Pré-requisitos
 
-**Princípios aplicados:**
-- Separação de responsabilidades
-- Inversão de dependências
-- Código limpo e testável
+.NET 8.0 SDK
+MySQL Server (versão 8.0+)
+Visual Studio ou VS Code
 
-SEÇÃO 4: Funcionalidades
-markdown## Funcionalidades Implementadas
+Passos de Instalação
 
-### Autenticação e Autorização
-- [x] Registro de empresas com primeiro usuário admin
-- [x] Login com JWT
-- [x] Hash de senhas com BCrypt
-- [x] Proteção de rotas com [Authorize]
+Clone o repositório
 
-### Multi-Tenancy
-- [x] Isolamento automático de dados por empresa
-- [x] Query Filters do Entity Framework
-- [x] TenantProvider para extrair empresa do token
-- [x] Impossível acessar dados de outras empresas
+bashgit clone https://github.com/CaioFerreira007/SistemaFinanceiroERP.API.git
+cd SistemaFinanceiroERP.API
 
-### Gestão de Produtos
-- [x] CRUD completo de produtos
-- [x] Validação com FluentValidation
-- [x] Soft Delete (campo Ativo)
-- [x] Auditoria (DataCriacao, DataAtualizacao)
+Configure a connection string
+Edite appsettings.json:
 
-### Gestão de Usuários
-- [x] CRUD completo de usuários
-- [x] Troca de senha com validação
-- [x] Vínculo automático com empresa
-
-### Gestão de Empresas
-- [x] Visualização de dados da empresa
-- [x] Atualização de dados cadastrais
-- [x] Proteção contra acesso a outras empresas
-
-### Repository Pattern
-- [x] Repository genérico (IRepository<T>)
-- [x] Repositories específicos por entidade
-- [x] Centralização de queries
-- [x] Código testável
-
-SEÇÃO 5: Como Rodar
-markdown## Como Rodar o Projeto
-
-### Pré-requisitos
-
-- .NET SDK 8.0 ou superior
-- MySQL 8.0 ou superior
-- Visual Studio 2022 ou VS Code
-
-### Configuração
-
-1. Clone o repositório
-```bash
-git clone [seu-repositorio]
-cd SistemaFinanceiroERP
-```
-
-2. Configure a connection string no `appsettings.json`
-```json
-{
+json{
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=erp_db;User=root;Password=sua_senha;"
+    "DefaultConnection": "Server=localhost;Port=3306;Database=SistemaFinanceiroERP;User=root;Password=sua_senha;"
   }
 }
-```
 
-3. Execute as migrations
-```bash
-dotnet ef database update
-```
+Instale as dependências
 
-4. Rode o projeto
-```bash
-dotnet run
-```
+bashdotnet restore
 
-5. Acesse o Swagger
-```
-https://localhost:7123/swagger
-```
+Execute as migrations
 
-### Primeiro Uso
+bashdotnet ef database update
 
-1. Registre uma empresa em `POST /api/Auth/register`
-2. Faça login em `POST /api/Auth/login`
-3. Copie o token retornado
-4. Clique em "Authorize" no Swagger
-5. Cole o token e explore os endpoints
+Execute a aplicação
 
-SEÇÃO 6: Estrutura de Dados
-markdown## Entidades Principais
+bashdotnet run
 
-### Empresa
-- Dados cadastrais (CNPJ, Razão Social, Nome Fantasia)
-- Contato (Email, Telefone)
-- Tipo (MEI, Simples Nacional, Lucro Presumido, Lucro Real)
+Acesse a documentação
+Abra no navegador: https://localhost:7206/swagger
 
-### Usuario
-- Dados pessoais (Nome, Email, Telefone)
-- Autenticação (Senha hasheada)
-- Vínculo com Empresa
+🧪 Testando os Endpoints
+1. Fazer Login
+bashcurl -X POST "https://localhost:7206/api/Auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "seu_email@example.com",
+    "senha": "sua_senha"
+  }'
+2. Copiar o Token JWT
+O response retornará um token. Copie-o.
+3. Usar o Token
+Clique no botão "Authorize" no Swagger e cole: Bearer seu_token_aqui
+4. Testar Endpoints
+Use o Swagger UI para testar todos os endpoints com documentação interativa.
+🏗️ Padrões Implementados
+Repository Pattern
+Abstração de acesso a dados com interfaces genéricas e específicas.
+Dependency Injection
+Todas as dependências injetadas via construtor para fácil teste e manutenção.
+AutoMapper
+Mapeamento automático entre Entidades e DTOs.
+FluentValidation
+Validações fluentes e reutilizáveis.
+Multi-Tenancy
+Isolamento de dados por empresa usando Query Filters do EF Core.
+Clean Architecture
+Separação clara de responsabilidades em 4 camadas.
+🔐 Segurança
 
-### Produto
-- Informações básicas (Nome, Categoria, Descrição)
-- Controle de estoque (Quantidade, Unidade de Medida)
-- Precificação (Preço Unitário)
-- Rastreabilidade (Código de Barras)
+Autenticação JWT: Tokens seguros com expiração configurável
+Hash de Senhas: Usando PBKDF2
+Multi-Tenancy: Cada empresa vê apenas seus próprios dados
+Query Filters: Aplicados automaticamente em todas as consultas
+[Authorize]: Proteção de endpoints que requerem autenticação
 
-SEÇÃO 7: Roadmap
-markdown## Roadmap
+📈 Progresso do Projeto
+FaseDescriçãoStatus1Fundação (Auth, Multi-tenant)✅ Completo2Estoque (Movimentações, Ajustes)✅ Completo3.1Transações B2B✅ Completo3.2Validações Avançadas⏳ Futuro4Módulo Financeiro⏳ Futuro5Relatórios e Analytics⏳ Futuro
+💡 Decisões Arquiteturais
+Por que Clean Architecture?
+Facilita testes, manutenção e escalabilidade. Cada camada tem responsabilidade única.
+Por que Multi-Tenancy?
+Simula um ambiente real de SaaS onde múltiplas empresas usam o mesmo sistema com dados isolados.
+Por que ItemTransacao é agregado?
+Seguindo DDD (Domain-Driven Design), itens só existem no contexto de uma transação.
+Por que NumeroTransacao é gerado no banco?
+Garante unicidade global e impossibilita duplicação mesmo com requisições simultâneas.
+📚 Tecnologias Aprendidas
 
-### Fase 1: Base Profissional (concluída)
-- [x] FluentValidation
-- [x] Hash de Senhas
-- [x] JWT + Autenticação
-- [x] Multi-tenancy
-- [x] Repository Pattern
-- [x] Documentação Básica
+ASP.NET Core com padrão MVC
+Entity Framework Core com lazy loading e includes
+JWT Authentication e Authorization
+Query Filters para multi-tenancy
+AutoMapper para DTOs
+FluentValidation para validações complexas
+Padrões SOLID e Clean Architecture
+Best practices de API REST
 
-### Fase 2: Entidades Core (0%)
-- [ ] Clientes
-- [ ] Fornecedores
-- [ ] Relacionamentos
+🎓 Objetivo Educacional
+Este projeto foi desenvolvido como exercício de aprendizado de:
 
-### Fase 3: Gestão de Estoque (0%)
-- [ ] Movimentações
-- [ ] Inventário
-- [ ] Alertas
+Arquitetura de software em camadas
+Padrões de design profissionais
+Desenvolvimento de APIs em produção
+Segurança em aplicações web
+Conceitos avançados de C# e .NET
 
-### Fases 4-10: Vendas, Compras, Financeiro, Relatórios, Testes, Performance, Deploy
+📞 Contato
+Desenvolvedor: Caio Gustavo Bernardo Ferreira
+Email: caiogggustavo49@gmail.com
+LinkedIn: linkedin.com/in/caioferreira007
+GitHub: github.com/CaioFerreira007
+📝 Licença
+Este projeto está sob licença MIT. Veja o arquivo LICENSE para mais detalhes.
+
+Desenvolvido com ❤️ durante jornada de aprendizado em desenvolvimento backend profissional.
