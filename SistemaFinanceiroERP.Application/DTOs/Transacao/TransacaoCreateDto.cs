@@ -12,7 +12,7 @@ namespace SistemaFinanceiroERP.Application.DTOs.Transacao
         public StatusTransacao StatusTransacao { get; set; }
         public decimal Desconto { get; set; }
         public string Observacao { get; set; } = string.Empty;
-        public ICollection<ItemTransacaoCreateDto>? ItensTransacao { get; set; }
+        public ICollection<ItemTransacaoCreateDto>? ItemsTransacao { get; set; }
         public DateTime DataTransacao { get; set; } = DateTime.UtcNow;
     }
 }

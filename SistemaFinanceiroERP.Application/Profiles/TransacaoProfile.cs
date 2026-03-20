@@ -26,7 +26,7 @@ namespace SistemaFinanceiroERP.Application.Profiles
                 .ForMember(dest => dest.ValorTotal,
                 opt => opt.MapFrom(src => src.ValorTotal))
 
-                .ForMember(dest => dest.Itens,
+                .ForMember(dest => dest.Items,
                 opt => opt.MapFrom(src => src.ItemsTransacao));
 
 

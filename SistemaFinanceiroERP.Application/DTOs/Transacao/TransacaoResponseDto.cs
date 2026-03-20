@@ -32,7 +32,7 @@ namespace SistemaFinanceiroERP.Application.DTOs.Transacao
 
         public decimal ValorTotal { get; set; }
 
-        public ICollection<ItemTransacaoResponseDto>? Itens { get; set; }
+        public ICollection<ItemTransacaoResponseDto>? Items{ get; set; }
 
 
     }

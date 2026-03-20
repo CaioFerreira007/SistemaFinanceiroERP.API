@@ -34,6 +34,7 @@ builder.Services.AddScoped<ILocalEstoqueRepository, LocalEstoqueRepository>();
 builder.Services.AddScoped<IMovimentacaoEstoqueRepository, MovimentacaoEstoqueRepository>();
 builder.Services.AddScoped<IAjusteEstoqueRepository, AjusteEstoqueRepository>();    
 builder.Services.AddScoped<ITransacaoRepository, TransacaoRepository>();
+builder.Services.AddScoped<IItemTransacaoRepository, ItemTransacaoRepository>();
 // Add services to the container.
 
 builder.Services.AddControllers()

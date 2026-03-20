@@ -12,7 +12,7 @@ namespace SistemaFinanceiroERP.Application.Validators.Transacao
                 .NotEqual(x => x.EmpresaVendedoraId).WithMessage("A empresa compradora não pode ser a mesma que a vendedora.");
             RuleFor(x => x.EmpresaVendedoraId)
                 .NotEmpty().WithMessage("O ID da empresa vendedora é obrigatório.");
-            RuleFor(x => x.ItensTransacao)
+            RuleFor(x => x.ItemsTransacao)
                 .NotEmpty().WithMessage("A transação deve conter pelo menos um item.");
             RuleFor(x => x.Desconto)
                 .GreaterThanOrEqualTo(0).WithMessage("O desconto não pode ser negativo.");

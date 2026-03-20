@@ -74,7 +74,7 @@ namespace SistemaFinanceiroERP.API.Controllers
 
      
         [HttpGet("produto/{produtoId:int}")]  
-        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByProduto(int produtoId)  // ✅ CORRIGIDO
+        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByProduto(int produtoId)  
         {
             var movs = await _repository.GetByProdutoAsync(produtoId); 
             var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movs);
@@ -83,7 +83,7 @@ namespace SistemaFinanceiroERP.API.Controllers
 
       
         [HttpGet("local/{localEstoqueId:int}")]  
-        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByLocalEstoque(int localEstoqueId)  // ✅ CORRIGIDO
+        public async Task<ActionResult<IEnumerable<MovimentacaoEstoqueResponseDto>>> GetByLocalEstoque(int localEstoqueId) 
         {
             var movs = await _repository.GetByLocalEstoqueAsync(localEstoqueId); 
             var response = _mapper.Map<IEnumerable<MovimentacaoEstoqueResponseDto>>(movs);
