@@ -193,8 +193,8 @@ Segurança em aplicações web
 Conceitos avançados de C# e .NET
 
 📞 Contato
-Desenvolvedor: Caio Gustavo Ferreira
-Email: caiogustavof@gmail.com
+Desenvolvedor: Caio Gustavo Bernardo Ferreira
+Email: caiogggustavo49@gmail.com
 LinkedIn: linkedin.com/in/caioferreira007
 GitHub: github.com/CaioFerreira007
 📝 Licença
