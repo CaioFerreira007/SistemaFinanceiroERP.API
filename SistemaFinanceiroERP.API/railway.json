@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "dockerfile"
+  },
+  "deploy": {
+    "startCommand": "dotnet SistemaFinanceiroERP.API.dll",
+    "restartPolicyType": "unless_stopped",
+    "restartPolicyMaxRetries": 3
+  }
+}

@@ -1,0 +1,35 @@
+# Stage 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copiar arquivo de projeto
+COPY ["SistemaFinanceiroERP.API/SistemaFinanceiroERP.API.csproj", "SistemaFinanceiroERP.API/"]
+COPY ["SistemaFinanceiroERP.Application/SistemaFinanceiroERP.Application.csproj", "SistemaFinanceiroERP.Application/"]
+COPY ["SistemaFinanceiroERP.Domain/SistemaFinanceiroERP.Domain.csproj", "SistemaFinanceiroERP.Domain/"]
+COPY ["SistemaFinanceiroERP.Infrastructure/SistemaFinanceiroERP.Infrastructure.csproj", "SistemaFinanceiroERP.Infrastructure/"]
+
+# Restaurar dependências
+RUN dotnet restore "SistemaFinanceiroERP.API/SistemaFinanceiroERP.API.csproj"
+
+# Copiar todo o código
+COPY . .
+
+# Build da aplicação
+WORKDIR "/src/SistemaFinanceiroERP.API"
+RUN dotnet build "SistemaFinanceiroERP.API.csproj" -c Release -o /app/build
+
+# Stage 2: Publish
+FROM build AS publish
+RUN dotnet publish "SistemaFinanceiroERP.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Stage 3: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+# Expor porta
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+# Comando para rodar
+ENTRYPOINT ["dotnet", "SistemaFinanceiroERP.API.dll"]
